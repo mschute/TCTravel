@@ -25,6 +25,7 @@ namespace TCTravel.Controllers
         public async Task<ActionResult<IEnumerable<ClientCompany>>> GetClientCompanies()
         {
             return await _context.ClientCompanies.ToListAsync();
+
         }
 
         // GET: api/ClientCompany/5
@@ -39,11 +40,13 @@ namespace TCTravel.Controllers
             }
 
             return clientCompany;
+
         }
 
         // PUT: api/ClientCompany/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+
         public async Task<IActionResult> PutClientCompany(int id, ClientCompany clientCompany)
         {
             if (id != clientCompany.ClientCompanyId)
@@ -59,6 +62,7 @@ namespace TCTravel.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
+
                 if (!ClientCompanyExists(id))
                 {
                     return NotFound();
@@ -85,6 +89,7 @@ namespace TCTravel.Controllers
 
         // DELETE: api/ClientCompany/5
         [HttpDelete("{id}")]
+
         public async Task<IActionResult> DeleteClientCompany(int id)
         {
             var clientCompany = await _context.ClientCompanies.FindAsync(id);
@@ -94,11 +99,12 @@ namespace TCTravel.Controllers
             }
 
             _context.ClientCompanies.Remove(clientCompany);
+
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
-
+        
         private bool ClientCompanyExists(int id)
         {
             return _context.ClientCompanies.Any(e => e.ClientCompanyId == id);

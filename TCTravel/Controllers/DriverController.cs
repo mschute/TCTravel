@@ -53,6 +53,7 @@ namespace TCTravel.Controllers
 
             _context.Entry(driver).State = EntityState.Modified;
 
+
             try
             {
                 await _context.SaveChangesAsync();
@@ -60,6 +61,7 @@ namespace TCTravel.Controllers
             catch (DbUpdateConcurrencyException)
             {
                 if (!DriverExists(id))
+
                 {
                     return NotFound();
                 }
@@ -89,11 +91,13 @@ namespace TCTravel.Controllers
         {
             var driver = await _context.Drivers.FindAsync(id);
             if (driver == null)
+
             {
                 return NotFound();
             }
 
             _context.Drivers.Remove(driver);
+            
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -102,6 +106,7 @@ namespace TCTravel.Controllers
         private bool DriverExists(int id)
         {
             return _context.Drivers.Any(e => e.DriverId == id);
+
         }
     }
 }

@@ -25,10 +25,12 @@ namespace TCTravel.Controllers
         public async Task<ActionResult<IEnumerable<Location>>> GetLocations()
         {
             return await _context.Locations.ToListAsync();
+
         }
 
         // GET: api/Location/5
         [HttpGet("{id}")]
+
         public async Task<ActionResult<Location>> GetLocation(int id)
         {
             var location = await _context.Locations.FindAsync(id);
@@ -89,11 +91,13 @@ namespace TCTravel.Controllers
         {
             var location = await _context.Locations.FindAsync(id);
             if (location == null)
+
             {
                 return NotFound();
             }
 
             _context.Locations.Remove(location);
+
             await _context.SaveChangesAsync();
 
             return NoContent();

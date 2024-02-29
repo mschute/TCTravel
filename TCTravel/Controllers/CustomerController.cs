@@ -25,6 +25,7 @@ namespace TCTravel.Controllers
         public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
         {
             return await _context.Customers.ToListAsync();
+
         }
 
         // GET: api/Customer/5
@@ -39,6 +40,7 @@ namespace TCTravel.Controllers
             }
 
             return customer;
+
         }
 
         // PUT: api/Customer/5
@@ -47,6 +49,7 @@ namespace TCTravel.Controllers
         public async Task<IActionResult> PutCustomer(int id, Customer customer)
         {
             if (id != customer.CustomerId)
+
             {
                 return BadRequest();
             }
@@ -59,6 +62,7 @@ namespace TCTravel.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
+
                 if (!CustomerExists(id))
                 {
                     return NotFound();
@@ -75,6 +79,7 @@ namespace TCTravel.Controllers
         // POST: api/Customer
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+
         public async Task<ActionResult<Customer>> PostCustomer(Customer customer)
         {
             _context.Customers.Add(customer);
@@ -89,11 +94,13 @@ namespace TCTravel.Controllers
         {
             var customer = await _context.Customers.FindAsync(id);
             if (customer == null)
+
             {
                 return NotFound();
             }
 
             _context.Customers.Remove(customer);
+
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -102,6 +109,7 @@ namespace TCTravel.Controllers
         private bool CustomerExists(int id)
         {
             return _context.Customers.Any(e => e.CustomerId == id);
+
         }
     }
 }

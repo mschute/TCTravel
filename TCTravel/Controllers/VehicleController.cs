@@ -25,6 +25,7 @@ namespace TCTravel.Controllers
         public async Task<ActionResult<IEnumerable<Vehicle>>> GetVehicles()
         {
             return await _context.Vehicles.ToListAsync();
+
         }
 
         // GET: api/Vehicle/5
@@ -34,11 +35,13 @@ namespace TCTravel.Controllers
             var vehicle = await _context.Vehicles.FindAsync(id);
 
             if (vehicle == null)
+
             {
                 return NotFound();
             }
 
             return vehicle;
+
         }
 
         // PUT: api/Vehicle/5
@@ -53,6 +56,7 @@ namespace TCTravel.Controllers
 
             _context.Entry(vehicle).State = EntityState.Modified;
 
+
             try
             {
                 await _context.SaveChangesAsync();
@@ -60,6 +64,7 @@ namespace TCTravel.Controllers
             catch (DbUpdateConcurrencyException)
             {
                 if (!VehicleExists(id))
+
                 {
                     return NotFound();
                 }
@@ -89,11 +94,13 @@ namespace TCTravel.Controllers
         {
             var vehicle = await _context.Vehicles.FindAsync(id);
             if (vehicle == null)
+
             {
                 return NotFound();
             }
 
             _context.Vehicles.Remove(vehicle);
+
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -102,6 +109,7 @@ namespace TCTravel.Controllers
         private bool VehicleExists(int id)
         {
             return _context.Vehicles.Any(e => e.VehicleId == id);
+
         }
     }
 }
