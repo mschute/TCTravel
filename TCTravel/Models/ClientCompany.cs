@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace TCTravel.Models;
 
 public class ClientCompany
@@ -9,5 +11,6 @@ public class ClientCompany
     public string? ClientCompanyPhone { get; set; }
     public string? ContactName { get; set; }
     
+    [JsonIgnore]
     public ICollection<Booking>? Bookings { get; set; }
 }

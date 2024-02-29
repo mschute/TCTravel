@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace TCTravel.Models;
 
 public class Customer
@@ -8,5 +10,6 @@ public class Customer
     public DateOnly? Dob { get; set; }
     public string? Nationality { get; set; }
     
+    [JsonIgnore]
     public ICollection<Booking>? Bookings { get; set; }
 }
