@@ -22,36 +22,36 @@ namespace TCTravel.Controllers
 
         // GET: api/Vehicle
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Booking>>> GetBookings()
+        public async Task<ActionResult<IEnumerable<Vehicle>>> GetVehicles()
         {
-            return await _context.Bookings.ToListAsync();
+            return await _context.Vehicles.ToListAsync();
         }
 
         // GET: api/Vehicle/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Booking>> GetBooking(int id)
+        public async Task<ActionResult<Vehicle>> GetVehicle(int id)
         {
-            var booking = await _context.Bookings.FindAsync(id);
+            var vehicle = await _context.Vehicles.FindAsync(id);
 
-            if (booking == null)
+            if (vehicle == null)
             {
                 return NotFound();
             }
 
-            return booking;
+            return vehicle;
         }
 
         // PUT: api/Vehicle/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBooking(int id, Booking booking)
+        public async Task<IActionResult> PutVehicle(int id, Vehicle vehicle)
         {
-            if (id != booking.BookingId)
+            if (id != vehicle.VehicleId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(booking).State = EntityState.Modified;
+            _context.Entry(vehicle).State = EntityState.Modified;
 
             try
             {
@@ -59,7 +59,7 @@ namespace TCTravel.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!BookingExists(id))
+                if (!VehicleExists(id))
                 {
                     return NotFound();
                 }
@@ -75,33 +75,33 @@ namespace TCTravel.Controllers
         // POST: api/Vehicle
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Booking>> PostBooking(Booking booking)
+        public async Task<ActionResult<Vehicle>> PostVehicle(Vehicle vehicle)
         {
-            _context.Bookings.Add(booking);
+            _context.Vehicles.Add(vehicle);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetBooking", new { id = booking.BookingId }, booking);
+            return CreatedAtAction("GetVehicle", new { id = vehicle.VehicleId }, vehicle);
         }
 
         // DELETE: api/Vehicle/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBooking(int id)
+        public async Task<IActionResult> DeleteVehicle(int id)
         {
-            var booking = await _context.Bookings.FindAsync(id);
-            if (booking == null)
+            var vehicle = await _context.Vehicles.FindAsync(id);
+            if (vehicle == null)
             {
                 return NotFound();
             }
 
-            _context.Bookings.Remove(booking);
+            _context.Vehicles.Remove(vehicle);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool BookingExists(int id)
+        private bool VehicleExists(int id)
         {
-            return _context.Bookings.Any(e => e.BookingId == id);
+            return _context.Vehicles.Any(e => e.VehicleId == id);
         }
     }
 }

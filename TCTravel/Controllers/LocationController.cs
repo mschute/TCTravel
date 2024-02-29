@@ -22,36 +22,36 @@ namespace TCTravel.Controllers
 
         // GET: api/Location
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Booking>>> GetBookings()
+        public async Task<ActionResult<IEnumerable<Location>>> GetLocations()
         {
-            return await _context.Bookings.ToListAsync();
+            return await _context.Locations.ToListAsync();
         }
 
         // GET: api/Location/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Booking>> GetBooking(int id)
+        public async Task<ActionResult<Location>> GetLocation(int id)
         {
-            var booking = await _context.Bookings.FindAsync(id);
+            var location = await _context.Locations.FindAsync(id);
 
-            if (booking == null)
+            if (location == null)
             {
                 return NotFound();
             }
 
-            return booking;
+            return location;
         }
 
         // PUT: api/Location/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBooking(int id, Booking booking)
+        public async Task<IActionResult> PutLocation(int id, Location location)
         {
-            if (id != booking.BookingId)
+            if (id != location.LocationId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(booking).State = EntityState.Modified;
+            _context.Entry(location).State = EntityState.Modified;
 
             try
             {
@@ -59,7 +59,7 @@ namespace TCTravel.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!BookingExists(id))
+                if (!LocationExists(id))
                 {
                     return NotFound();
                 }
@@ -75,33 +75,33 @@ namespace TCTravel.Controllers
         // POST: api/Location
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Booking>> PostBooking(Booking booking)
+        public async Task<ActionResult<Location>> PostLocation(Location location)
         {
-            _context.Bookings.Add(booking);
+            _context.Locations.Add(location);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetBooking", new { id = booking.BookingId }, booking);
+            return CreatedAtAction("GetLocation", new { id = location.LocationId }, location);
         }
 
         // DELETE: api/Location/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBooking(int id)
+        public async Task<IActionResult> DeleteLocation(int id)
         {
-            var booking = await _context.Bookings.FindAsync(id);
-            if (booking == null)
+            var location = await _context.Locations.FindAsync(id);
+            if (location == null)
             {
                 return NotFound();
             }
 
-            _context.Bookings.Remove(booking);
+            _context.Locations.Remove(location);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool BookingExists(int id)
+        private bool LocationExists(int id)
         {
-            return _context.Bookings.Any(e => e.BookingId == id);
+            return _context.Locations.Any(e => e.LocationId == id);
         }
     }
 }
