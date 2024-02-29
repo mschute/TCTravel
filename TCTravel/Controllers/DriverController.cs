@@ -22,36 +22,37 @@ namespace TCTravel.Controllers
 
         // GET: api/Driver
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Booking>>> GetBookings()
+        public async Task<ActionResult<IEnumerable<Driver>>> GetDrivers()
         {
-            return await _context.Bookings.ToListAsync();
+            return await _context.Drivers.ToListAsync();
         }
 
         // GET: api/Driver/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Booking>> GetBooking(int id)
+        public async Task<ActionResult<Driver>> GetDriver(int id)
         {
-            var booking = await _context.Bookings.FindAsync(id);
+            var driver = await _context.Drivers.FindAsync(id);
 
-            if (booking == null)
+            if (driver == null)
             {
                 return NotFound();
             }
 
-            return booking;
+            return driver;
         }
 
         // PUT: api/Driver/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBooking(int id, Booking booking)
+        public async Task<IActionResult> PutDriver(int id, Driver driver)
         {
-            if (id != booking.BookingId)
+            if (id != driver.DriverId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(booking).State = EntityState.Modified;
+            _context.Entry(driver).State = EntityState.Modified;
+
 
             try
             {
@@ -59,7 +60,8 @@ namespace TCTravel.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!BookingExists(id))
+                if (!DriverExists(id))
+
                 {
                     return NotFound();
                 }
@@ -75,33 +77,36 @@ namespace TCTravel.Controllers
         // POST: api/Driver
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Booking>> PostBooking(Booking booking)
+        public async Task<ActionResult<Driver>> PostDriver(Driver driver)
         {
-            _context.Bookings.Add(booking);
+            _context.Drivers.Add(driver);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetBooking", new { id = booking.BookingId }, booking);
+            return CreatedAtAction("GetDriver", new { id = driver.DriverId }, driver);
         }
 
         // DELETE: api/Driver/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBooking(int id)
+        public async Task<IActionResult> DeleteDriver(int id)
         {
-            var booking = await _context.Bookings.FindAsync(id);
-            if (booking == null)
+            var driver = await _context.Drivers.FindAsync(id);
+            if (driver == null)
+
             {
                 return NotFound();
             }
 
-            _context.Bookings.Remove(booking);
+            _context.Drivers.Remove(driver);
+            
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool BookingExists(int id)
+        private bool DriverExists(int id)
         {
-            return _context.Bookings.Any(e => e.BookingId == id);
+            return _context.Drivers.Any(e => e.DriverId == id);
+
         }
     }
 }

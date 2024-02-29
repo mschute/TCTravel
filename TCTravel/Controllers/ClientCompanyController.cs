@@ -22,36 +22,39 @@ namespace TCTravel.Controllers
 
         // GET: api/ClientCompany
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Booking>>> GetBookings()
+        public async Task<ActionResult<IEnumerable<ClientCompany>>> GetClientCompanies()
         {
-            return await _context.Bookings.ToListAsync();
+            return await _context.ClientCompanies.ToListAsync();
+
         }
 
         // GET: api/ClientCompany/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Booking>> GetBooking(int id)
+        public async Task<ActionResult<ClientCompany>> GetClientCompany(int id)
         {
-            var booking = await _context.Bookings.FindAsync(id);
+            var clientCompany = await _context.ClientCompanies.FindAsync(id);
 
-            if (booking == null)
+            if (clientCompany == null)
             {
                 return NotFound();
             }
 
-            return booking;
+            return clientCompany;
+
         }
 
         // PUT: api/ClientCompany/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBooking(int id, Booking booking)
+
+        public async Task<IActionResult> PutClientCompany(int id, ClientCompany clientCompany)
         {
-            if (id != booking.BookingId)
+            if (id != clientCompany.ClientCompanyId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(booking).State = EntityState.Modified;
+            _context.Entry(clientCompany).State = EntityState.Modified;
 
             try
             {
@@ -59,7 +62,8 @@ namespace TCTravel.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!BookingExists(id))
+
+                if (!ClientCompanyExists(id))
                 {
                     return NotFound();
                 }
@@ -75,33 +79,35 @@ namespace TCTravel.Controllers
         // POST: api/ClientCompany
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Booking>> PostBooking(Booking booking)
+        public async Task<ActionResult<ClientCompany>> PostClientCompany(ClientCompany clientCompany)
         {
-            _context.Bookings.Add(booking);
+            _context.ClientCompanies.Add(clientCompany);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetBooking", new { id = booking.BookingId }, booking);
+            return CreatedAtAction("GetClientCompany", new { id = clientCompany.ClientCompanyId }, clientCompany);
         }
 
         // DELETE: api/ClientCompany/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBooking(int id)
+
+        public async Task<IActionResult> DeleteClientCompany(int id)
         {
-            var booking = await _context.Bookings.FindAsync(id);
-            if (booking == null)
+            var clientCompany = await _context.ClientCompanies.FindAsync(id);
+            if (clientCompany == null)
             {
                 return NotFound();
             }
 
-            _context.Bookings.Remove(booking);
+            _context.ClientCompanies.Remove(clientCompany);
+
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
-
-        private bool BookingExists(int id)
+        
+        private bool ClientCompanyExists(int id)
         {
-            return _context.Bookings.Any(e => e.BookingId == id);
+            return _context.ClientCompanies.Any(e => e.ClientCompanyId == id);
         }
     }
 }
