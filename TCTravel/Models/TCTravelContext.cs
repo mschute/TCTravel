@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace TCTravel.Models;
 
-public class TCTravelContext : DbContext
+public class TCTravelContext : IdentityDbContext<IdentityUser>
 {
     public TCTravelContext(DbContextOptions<TCTravelContext> options)
         : base(options)

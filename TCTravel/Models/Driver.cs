@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace TCTravel.Models;
 
 public class Driver
