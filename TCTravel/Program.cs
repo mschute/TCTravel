@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TCTravel.Models;
+using TCTravel.Service;
+using TCTravel.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +12,9 @@ builder.Services.AddDbContext<TCTravelContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Connection")));
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<TCTravelContext>().AddDefaultTokenProviders();
+
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddScoped<EmailService>();
 
 var app = builder.Build();
 
