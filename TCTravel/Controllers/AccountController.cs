@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using TCTravel.Helpers;
 
 namespace TCTravel.Controllers;
@@ -28,6 +29,8 @@ public class AccountController : ControllerBase
         _configuration = configuration;
     }
 
+    // Authorize ensures only requests with Jwt tokens can access the associated action
+    [Authorize]
     // Register user to website 
     [HttpPost("register")]
     
@@ -55,7 +58,7 @@ public class AccountController : ControllerBase
 
         if (result.Succeeded)
         {
-            // Generate an email verification token
+            // Generate an email verification token, user can now communicate with endpoint services
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
             // Create the verification link
@@ -67,7 +70,7 @@ public class AccountController : ControllerBase
             var emailSubject = "Email Verification for Tay Country Travel";
             var emailBody = $"Welcome to Tay Country Travel! We are pleased you are interest in our luxury travel service. Thank you for creating an account. " +
                             $"To finish the sign-up process, please verify your email by clicking the following link: \n {verificationLink}" +
-                            $"\nKind regards,\n" +
+                            $"\n\nKind regards,\n" +
                             $"Tay Country Travel Team";
             _emailService.SendEmail(user.Email, emailSubject, emailBody);
 
@@ -126,6 +129,7 @@ public class AccountController : ControllerBase
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
             var roles = await _userManager.GetRolesAsync(user);
+            // Generating token
             var token = GenerateJwtToken(user, roles);
             // Return JWT Token for user authentication
             return Ok(new { Token = token });

@@ -12,19 +12,23 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
 builder.Services.AddDbContext<TCTravelContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Connection")));
 
+// Configure Identity Framework 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<TCTravelContext>().AddDefaultTokenProviders();
 
 // Included configured service from EmailSettings.cs
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
-// Email service will be added to the scope
+// Registers the email service with a scoped lifetime of a single request
 builder.Services.AddScoped<EmailService>();
 
+// Registers the email service with a scoped lifetime of a single request
 builder.Services.AddScoped<RolesController>();
 
+// Configure Jwt authentication
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -32,6 +36,31 @@ builder.Services.AddAuthentication(options =>
     })
     .AddJwtBearer(options =>
     {
+        options.Events = new JwtBearerEvents
+        {
+            // Event is triggered ifJWT authentication fails which could be due to token expiration, token signature verification failure etc. Will log event
+            OnAuthenticationFailed = context =>
+            {
+                // TODO Log Authentication error
+                Console.WriteLine("Authentication failed: " + context.Exception.Message);
+                return Task.CompletedTask;
+            },
+            // Event if triggered when token is valid, will log event Trigger a log event
+            OnTokenValidated = context =>
+            {
+                //TODO Log Token validation success
+                Console.WriteLine("Token validated");
+                return Task.CompletedTask;
+            },
+            // Event is triggered when user provides invalid credentials, can be used to redirect, will log event 
+            OnChallenge = context =>
+            {
+                //TODO Log Token validation success
+                Console.WriteLine("Authentication challenge " + context.Error);
+                return Task.CompletedTask;
+            }
+        };
+        
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
