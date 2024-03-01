@@ -17,7 +17,10 @@ builder.Services.AddDbContext<TCTravelContext>(options =>
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<TCTravelContext>().AddDefaultTokenProviders();
 
+// Included configured service from EmailSettings.cs
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
+// Email service will be added to the scope
 builder.Services.AddScoped<EmailService>();
 
 builder.Services.AddScoped<RolesController>();
