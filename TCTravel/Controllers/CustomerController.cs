@@ -14,43 +14,66 @@ namespace TCTravel.Controllers
     public class CustomerController : ControllerBase
     {
         private readonly TCTravelContext _context;
+        private readonly ILogger<CustomerController> _logger;
 
-        public CustomerController(TCTravelContext context)
+        public CustomerController(TCTravelContext context, ILogger<CustomerController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: api/Customer
+        // Retrieve all client companies
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
         {
-            return await _context.Customers.ToListAsync();
-
+            try
+            {
+                var customers = await _context.Customers.ToListAsync();
+            
+                _logger.LogInformation("Successfully retrieved Customers.");
+                return customers;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(GetCustomers)} failed with error: {ex}");
+                return StatusCode(500, "An unexpected error occurred. Please try again.");
+            }
         }
 
         // GET: api/Customer/5
+        // Retrieve specific customer
         [HttpGet("{id}")]
         public async Task<ActionResult<Customer>> GetCustomer(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
-
-            if (customer == null)
+            try
             {
-                return NotFound();
+                var customer = await _context.Customers.FindAsync(id);
+
+                if (customer == null)
+                {
+                    _logger.LogError($"Error, Customer {id} not found.");
+                    return NotFound("The customer was not found.");
+                }
+
+                _logger.LogInformation($"Customer {id} retrieved successfully.");
+                return customer;
             }
-
-            return customer;
-
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(GetCustomer)} failed with error: {ex}");
+                return StatusCode(500, "An unexpected error occurred. Please try again.");
+            }
         }
 
         // PUT: api/Customer/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // Update specific customer
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCustomer(int id, Customer customer)
         {
             if (id != customer.CustomerId)
-
             {
+                _logger.LogError("Error. Invalid request.");
                 return BadRequest();
             }
 
@@ -62,9 +85,9 @@ namespace TCTravel.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-
                 if (!CustomerExists(id))
                 {
+                    _logger.LogError($"Error. Customer {id} not found.");
                     return NotFound();
                 }
                 else
@@ -73,37 +96,57 @@ namespace TCTravel.Controllers
                 }
             }
 
+            _logger.LogInformation($"Customer {id} updated successfully!");
             return NoContent();
         }
 
         // POST: api/Customer
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // Create Customer
         [HttpPost]
 
         public async Task<ActionResult<Customer>> PostCustomer(Customer customer)
         {
-            _context.Customers.Add(customer);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Customers.Add(customer);
+                await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCustomer", new { id = customer.CustomerId }, customer);
+                _logger.LogInformation($"Customer created successfully");
+                return CreatedAtAction("GetCustomer", new { id = customer.CustomerId }, customer);
+            }
+            catch (Exception ex)
+            {
+               _logger.LogError($"{nameof(PostCustomer)} failed with error: {ex}");
+               return StatusCode(500, "An unexpected error occurred. Please try again.");
+            }
         }
 
         // DELETE: api/Customer/5
+        // Delete specific customer
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
-            if (customer == null)
-
+            try
             {
-                return NotFound();
+                var customer = await _context.Customers.FindAsync(id);
+                if (customer == null)
+                {
+                    _logger.LogError($"Error. Customer {id} not found");
+                    return NotFound();
+                }
+
+                _context.Customers.Remove(customer);
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Customer {id} deleted successfully");
+                return NoContent();
             }
-
-            _context.Customers.Remove(customer);
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(DeleteCustomer)} failed with error: {ex}");
+                return StatusCode(500, "An unexpected error occurred. Please try again later.");
+            }
         }
 
         private bool CustomerExists(int id)

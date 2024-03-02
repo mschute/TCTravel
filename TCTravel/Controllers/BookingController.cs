@@ -14,40 +14,66 @@ namespace TCTravel.Controllers
     public class BookingController : ControllerBase
     {
         private readonly TCTravelContext _context;
+        private readonly ILogger<BookingController> _logger;
 
-        public BookingController(TCTravelContext context)
+        public BookingController(TCTravelContext context, ILogger<BookingController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: api/Booking
+        // Retrieve all bookings
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Booking>>> GetBookings()
         {
-            return await _context.Bookings.ToListAsync();
+            try
+            {
+                var bookings = await _context.Bookings.ToListAsync();
+            
+                _logger.LogInformation("Successfully retrieved booking.");
+                return bookings;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(GetBookings)} failed with error: {ex}");
+                return StatusCode(500, "An unexpected error occurred. Please try again.");
+            }
         }
 
         // GET: api/Booking/5
+        // Retrieve specific bookings
         [HttpGet("{id}")]
         public async Task<ActionResult<Booking>> GetBooking(int id)
         {
-            var booking = await _context.Bookings.FindAsync(id);
-
-            if (booking == null)
+            try
             {
-                return NotFound();
-            }
+                var booking = await _context.Bookings.FindAsync(id);
 
-            return booking;
+                if (booking == null)
+                {
+                    _logger.LogError($"Error, booking {id} not found.");
+                    return NotFound();
+                }
+
+                _logger.LogInformation($"Booking {id} retrieved successfully.");
+                return booking;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(GetBooking)} failed with error: {ex}");
+                return StatusCode(500, "An unexpected error occurred. Please try again.");
+            }
         }
 
         // PUT: api/Booking/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // Update specific booking
         [HttpPut("{id}")]
         public async Task<IActionResult> PutBooking(int id, Booking booking)
         {
             if (id != booking.BookingId)
             {
+                _logger.LogError("Error. Invalid request.");
                 return BadRequest();
             }
 
@@ -61,7 +87,8 @@ namespace TCTravel.Controllers
             {
                 if (!BookingExists(id))
                 {
-                    return NotFound();
+                    _logger.LogError($"Error. Booking {id} not found.");
+                    return NotFound(" The Booking was not found");
                 }
                 else
                 {
@@ -69,34 +96,56 @@ namespace TCTravel.Controllers
                 }
             }
 
+            _logger.LogInformation($"Booking {id} updated successfully!");
             return NoContent();
         }
 
         // POST: api/Booking
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // Create booking
         [HttpPost]
         public async Task<ActionResult<Booking>> PostBooking(Booking booking)
         {
-            _context.Bookings.Add(booking);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Bookings.Add(booking);
+                await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetBooking", new { id = booking.BookingId }, booking);
+                _logger.LogInformation($"Booking created successfully!");
+                return CreatedAtAction("GetBooking", new { id = booking.BookingId }, booking);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(PostBooking)} failed with error: {ex}");
+                return StatusCode(500, "An unexpected error occurred. Please try again.");
+            }
         }
 
         // DELETE: api/Booking/5
+        // Delete specific booking
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBooking(int id)
         {
-            var booking = await _context.Bookings.FindAsync(id);
-            if (booking == null)
+            try
             {
-                return NotFound();
+                var booking = await _context.Bookings.FindAsync(id);
+
+                if (booking == null)
+                {
+                    _logger.LogError($"Error. Booking {id} not found");
+                    return NotFound("The booking was not found.");
+                }
+
+                _context.Bookings.Remove(booking);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Booking {id} deleted successfully");
+                return NoContent();
             }
-
-            _context.Bookings.Remove(booking);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(DeleteBooking)} failed with error: {ex}");
+                return StatusCode(500, "An unexpected error occurred. Please try again later.");
+            }
         }
 
         private bool BookingExists(int id)

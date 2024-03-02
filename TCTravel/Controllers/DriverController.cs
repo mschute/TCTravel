@@ -14,46 +14,71 @@ namespace TCTravel.Controllers
     public class DriverController : ControllerBase
     {
         private readonly TCTravelContext _context;
+        private readonly ILogger<DriverController> _logger;
 
-        public DriverController(TCTravelContext context)
+        public DriverController(TCTravelContext context, ILogger<DriverController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: api/Driver
+        // Retrieve all Drivers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Driver>>> GetDrivers()
         {
-            return await _context.Drivers.ToListAsync();
+            try
+            {
+                var drivers = await _context.Drivers.ToListAsync();
+            
+                _logger.LogInformation("Successfully retrieved Drivers.");
+                return drivers;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(GetDrivers)} failed with error: {ex}");
+                return StatusCode(500, "An unexpected error occurred. Please try again.");
+            }
         }
 
         // GET: api/Driver/5
+        // Retrieve specific driver
         [HttpGet("{id}")]
         public async Task<ActionResult<Driver>> GetDriver(int id)
         {
-            var driver = await _context.Drivers.FindAsync(id);
-
-            if (driver == null)
+            try
             {
-                return NotFound();
-            }
+                var driver = await _context.Drivers.FindAsync(id);
 
-            return driver;
+                if (driver == null)
+                {
+                    _logger.LogError($"Error, Driver {id} not found.");
+                    return NotFound();
+                }
+
+                _logger.LogInformation($"Driver {id} retrieved successfully.");
+                return driver;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(GetDriver)} failed with error: {ex}");
+                return StatusCode(500, "An unexpected error occurred. Please try again.");
+            }
         }
 
         // PUT: api/Driver/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // Update specific driver
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDriver(int id, Driver driver)
         {
             if (id != driver.DriverId)
             {
+                _logger.LogError("Error. Invalid request.");
                 return BadRequest();
             }
 
             _context.Entry(driver).State = EntityState.Modified;
-
-
+            
             try
             {
                 await _context.SaveChangesAsync();
@@ -61,9 +86,9 @@ namespace TCTravel.Controllers
             catch (DbUpdateConcurrencyException)
             {
                 if (!DriverExists(id))
-
                 {
-                    return NotFound();
+                    _logger.LogError($"Error. Driver {id} not found.");
+                    return NotFound("The driver was not found.");
                 }
                 else
                 {
@@ -71,36 +96,56 @@ namespace TCTravel.Controllers
                 }
             }
 
+            _logger.LogInformation($"Driver {id} updated successfully!");
             return NoContent();
         }
 
         // POST: api/Driver
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // Create Driver
         [HttpPost]
         public async Task<ActionResult<Driver>> PostDriver(Driver driver)
         {
-            _context.Drivers.Add(driver);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Drivers.Add(driver);
+                await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetDriver", new { id = driver.DriverId }, driver);
+                _logger.LogInformation($"Driver created successfully!");
+                return CreatedAtAction("GetDriver", new { id = driver.DriverId }, driver);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(PostDriver)} failed with error: {ex}");
+                return StatusCode(500, "An unexpected error occurred. Please try again.");
+            }
         }
 
         // DELETE: api/Driver/5
+        // Delete specific driver
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDriver(int id)
         {
-            var driver = await _context.Drivers.FindAsync(id);
-            if (driver == null)
-
+            try
             {
-                return NotFound();
-            }
+                var driver = await _context.Drivers.FindAsync(id);
+                if (driver == null)
+                {
+                    _logger.LogError($"Error. Driver {id} not found.");
+                    return NotFound("The driver was not found.");
+                }
 
-            _context.Drivers.Remove(driver);
+                _context.Drivers.Remove(driver);
             
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
-            return NoContent();
+                _logger.LogInformation($"Driver {id} deleted successfully!");
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(DeleteDriver)} failed with error: {ex}");
+                return StatusCode(500, "An unexpected error occurred. Please try again later.");
+            }
         }
 
         private bool DriverExists(int id)

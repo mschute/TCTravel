@@ -14,49 +14,71 @@ namespace TCTravel.Controllers
     public class VehicleController : ControllerBase
     {
         private readonly TCTravelContext _context;
+        private readonly ILogger<VehicleController> _logger;
 
-        public VehicleController(TCTravelContext context)
+        public VehicleController(TCTravelContext context, ILogger<VehicleController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: api/Vehicle
+        // Retrieve all vehicles
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Vehicle>>> GetVehicles()
         {
-            return await _context.Vehicles.ToListAsync();
-
+            try
+            {
+                var vehicles = await _context.Vehicles.ToListAsync();
+            
+                _logger.LogInformation("Successfully retrieved Vehicles.");
+                return vehicles;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(GetVehicles)} failed with error: {ex}");
+                return StatusCode(500, "An unexpected error occurred. Please try again.");
+            }
         }
 
         // GET: api/Vehicle/5
+        // Retrieve specific vehicle
         [HttpGet("{id}")]
         public async Task<ActionResult<Vehicle>> GetVehicle(int id)
         {
-            var vehicle = await _context.Vehicles.FindAsync(id);
-
-            if (vehicle == null)
-
+            try
             {
-                return NotFound();
+                var vehicle = await _context.Vehicles.FindAsync(id);
+
+                if (vehicle == null)
+                {
+                    _logger.LogError($"Error, Vehicle {id} not found.");
+                    return NotFound("The vehicle was not found.");
+                }
+
+                _logger.LogInformation($"Vehicle {id} retrieved successfully!");
+                return vehicle;
             }
-
-            return vehicle;
-
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(GetVehicle)} failed with error: {ex}");
+                return StatusCode(500, "An unexpected error occurred. Please try again.");
+            }
         }
 
         // PUT: api/Vehicle/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // Update specific vehicle
         [HttpPut("{id}")]
         public async Task<IActionResult> PutVehicle(int id, Vehicle vehicle)
         {
             if (id != vehicle.VehicleId)
             {
+                _logger.LogError("Error. Invalid request.");
                 return BadRequest();
             }
 
             _context.Entry(vehicle).State = EntityState.Modified;
-
-
+            
             try
             {
                 await _context.SaveChangesAsync();
@@ -64,9 +86,9 @@ namespace TCTravel.Controllers
             catch (DbUpdateConcurrencyException)
             {
                 if (!VehicleExists(id))
-
                 {
-                    return NotFound();
+                    _logger.LogError($"Error. Vehicle {id} not found.");
+                    return NotFound("The vehicle was not found.");
                 }
                 else
                 {
@@ -74,42 +96,61 @@ namespace TCTravel.Controllers
                 }
             }
 
+            _logger.LogInformation($"Vehicle {id} updated successfully!");
             return NoContent();
         }
 
         // POST: api/Vehicle
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // Create Vehicle
         [HttpPost]
         public async Task<ActionResult<Vehicle>> PostVehicle(Vehicle vehicle)
         {
-            _context.Vehicles.Add(vehicle);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Vehicles.Add(vehicle);
+                await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetVehicle", new { id = vehicle.VehicleId }, vehicle);
+                _logger.LogInformation("Location created successfully!");
+                return CreatedAtAction("GetVehicle", new { id = vehicle.VehicleId }, vehicle);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(PostVehicle)} failed with error: {ex}");
+                return StatusCode(500, "An unexpected error occurred. Please try again.");
+            }
         }
 
         // DELETE: api/Vehicle/5
+        // Delete specific vehicle
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVehicle(int id)
         {
-            var vehicle = await _context.Vehicles.FindAsync(id);
-            if (vehicle == null)
-
+            try
             {
-                return NotFound();
+                var vehicle = await _context.Vehicles.FindAsync(id);
+                if (vehicle == null)
+                {
+                    _logger.LogError($"Error. Location {id} not found.");
+                    return NotFound("The location was not found.");
+                }
+
+                _context.Vehicles.Remove(vehicle);
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Location {id} deleted successfully!");
+                return NoContent();
             }
-
-            _context.Vehicles.Remove(vehicle);
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                _logger.LogError($"{nameof(DeleteVehicle)} failed with error: {ex}");
+                return StatusCode(500, "An unexpected error occurred. Please try again later.");
+            }
         }
 
         private bool VehicleExists(int id)
         {
             return _context.Vehicles.Any(e => e.VehicleId == id);
-
         }
     }
 }
