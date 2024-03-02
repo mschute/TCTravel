@@ -17,7 +17,7 @@ public static class ValidationHelper
             return false;
         }
         
-        // Check if the password has uppercase, lowercase, is a digit 
+        // Check if the password does not contain uppercase, lowercase, or digit 
         if (!password.Any(char.IsUpper) || !password.Any(char.IsLower) || !password.Any(char.IsDigit))
         {
             return false;
@@ -35,14 +35,7 @@ public static class ValidationHelper
     private static bool HasSpecialChar(string input)
     {
         const string specialChar = @"\|!#$%&/()=?»«@£§€{}.-;\'<>_,\";
-        
-        foreach (var item in specialChar)
-        {
-            if (input.Contains(item))
-            {
-                return true;
-            }
-        }
-        return false;
+
+        return specialChar.Any(character => input.Contains(character));
     }
 }

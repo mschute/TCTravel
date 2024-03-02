@@ -1,8 +1,12 @@
+using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Console;
 using Microsoft.IdentityModel.Tokens;
+using TCTravel;
 using TCTravel.Controllers;
 using TCTravel.Models;
 using TCTravel.Service;
@@ -10,7 +14,15 @@ using TCTravel.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Configuring the logging for this application with minimum level of log messages set to Warning or higher
+builder.Logging.AddFilter("Microsoft.AspNetCore", LogLevel.Warning)
+    // Ensuring no previous log providers are set
+    .ClearProviders()
+    // Output logs to the console
+    .AddConsole()
+    // Output the logs to a file with the following path
+    .AddFile($"Logs/TCTravel-{typeof(JSType.Date)}.txt");
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<TCTravelContext>(options =>
@@ -28,6 +40,9 @@ builder.Services.AddScoped<EmailService>();
 // Registers the email service with a scoped lifetime of a single request
 builder.Services.AddScoped<RolesController>();
 
+// Registers the AppJwtBearer Events with a scoped lifetime of a single request
+builder.Services.AddScoped<AppJwtBearerEvents>();
+
 // Configure Jwt authentication
 builder.Services.AddAuthentication(options =>
     {
@@ -36,30 +51,8 @@ builder.Services.AddAuthentication(options =>
     })
     .AddJwtBearer(options =>
     {
-        options.Events = new JwtBearerEvents
-        {
-            // Event is triggered ifJWT authentication fails which could be due to token expiration, token signature verification failure etc. Will log event
-            OnAuthenticationFailed = context =>
-            {
-                // TODO Log Authentication error
-                Console.WriteLine("Authentication failed: " + context.Exception.Message);
-                return Task.CompletedTask;
-            },
-            // Event if triggered when token is valid, will log event Trigger a log event
-            OnTokenValidated = context =>
-            {
-                //TODO Log Token validation success
-                Console.WriteLine("Token validated");
-                return Task.CompletedTask;
-            },
-            // Event is triggered when user provides invalid credentials, can be used to redirect, will log event 
-            OnChallenge = context =>
-            {
-                //TODO Log Token validation success
-                Console.WriteLine("Authentication challenge " + context.Error);
-                return Task.CompletedTask;
-            }
-        };
+        // Override default events type for JwtBearerEvents in order to use logging
+        options.EventsType = typeof(AppJwtBearerEvents);
         
         options.TokenValidationParameters = new TokenValidationParameters
         {
