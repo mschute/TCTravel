@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ namespace TCTravel.Controllers
 
         // GET: api/Customer
         // Retrieve all client companies
+        [Authorize(Roles = "SuperAdmin,Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
         {
@@ -43,6 +45,8 @@ namespace TCTravel.Controllers
 
         // GET: api/Customer/5
         // Retrieve specific customer
+        //TODO Configure specific user access
+        [Authorize(Roles = "SuperAdmin,Admin,Customer")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Customer>> GetCustomer(int id)
         {
@@ -74,6 +78,7 @@ namespace TCTravel.Controllers
 
         // PUT: api/Customer/5
         // Update specific customer
+        [Authorize(Roles = "SuperAdmin,Admin,Customer")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCustomer(int id, Customer customer)
         {
@@ -114,8 +119,9 @@ namespace TCTravel.Controllers
 
         // POST: api/Customer
         // Create Customer
+        //TODO May need to update based on specific user access
+        [Authorize(Roles = "SuperAdmin,Admin,Customer")]
         [HttpPost]
-
         public async Task<ActionResult<Customer>> PostCustomer(Customer customer)
         {
             if (!ModelState.IsValid)
@@ -141,6 +147,7 @@ namespace TCTravel.Controllers
 
         // DELETE: api/Customer/5
         // Delete specific customer
+        [Authorize(Roles = "SuperAdmin,Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {

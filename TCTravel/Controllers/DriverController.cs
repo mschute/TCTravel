@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ namespace TCTravel.Controllers
 
         // GET: api/Driver
         // Retrieve all Drivers
+        [Authorize(Roles = "SuperAdmin,Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Driver>>> GetDrivers()
         {
@@ -43,6 +45,7 @@ namespace TCTravel.Controllers
 
         // GET: api/Driver/5
         // Retrieve specific driver
+        [Authorize(Roles = "SuperAdmin,Admin,Driver")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Driver>> GetDriver(int id)
         {
@@ -74,6 +77,7 @@ namespace TCTravel.Controllers
 
         // PUT: api/Driver/5
         // Update specific driver
+        [Authorize(Roles = "SuperAdmin,Admin,Driver")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDriver(int id, Driver driver)
         {
@@ -114,6 +118,8 @@ namespace TCTravel.Controllers
 
         // POST: api/Driver
         // Create Driver
+        //TODO May need to update based on specific driver
+        [Authorize(Roles = "SuperAdmin,Admin,Driver")]
         [HttpPost]
         public async Task<ActionResult<Driver>> PostDriver(Driver driver)
         {
@@ -140,6 +146,7 @@ namespace TCTravel.Controllers
 
         // DELETE: api/Driver/5
         // Delete specific driver
+        [Authorize(Roles = "SuperAdmin,Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDriver(int id)
         {
