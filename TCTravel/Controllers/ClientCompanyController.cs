@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TCTravel.Helpers;
 using TCTravel.Models;
 
 namespace TCTravel.Controllers
@@ -33,13 +29,13 @@ namespace TCTravel.Controllers
             {
                 var clientCompanies = await _context.ClientCompanies.ToListAsync();
             
-                _logger.LogInformation("Successfully retrieved Client Company.");
-                return clientCompanies;
+                _logger.LogInformationEx("Successfully retrieved Client Company.");
+                return Ok(clientCompanies);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(GetClientCompanies)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -53,36 +49,36 @@ namespace TCTravel.Controllers
         //TODO Need to pass AssignRoleModel for specific user restrictions
         public async Task<ActionResult<ClientCompany>> GetClientCompany(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 var clientCompany = await _context.ClientCompanies.FindAsync(id);
 
                 if (clientCompany == null)
                 {
-                    _logger.LogError($"Error, Client Company {id} not found.");
-                    return NotFound("The client company was not found.");
+                    _logger.LogErrorEx($"Client Company {id} not found.");
+                    return NotFound($"Client Company {id} not found.");
                 }
 
                 //TODO Finish implementing specific user restrictions
                 // if (id != model.ClientCompanyId && model.RoleName != "SuperAdmin" && model.RoleName != "Admin")
                 // {
-                //     _logger.LogError("User is unauthorized to get this information.");
+                //     _logger.LogErrorEx("User is unauthorized to get this information.");
                 //     return Unauthorized(new { message = "Unauthorized" });
                 // }
                 
-                _logger.LogInformation($"Client Company {id} retrieved successfully.");
+                _logger.LogInformationEx($"Client Company {id} retrieved successfully");
                 return clientCompany;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(GetClientCompany)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -94,40 +90,43 @@ namespace TCTravel.Controllers
 
         public async Task<IActionResult> PutClientCompany(int id, ClientCompany clientCompany)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
-            if (id != clientCompany.ClientCompanyId)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest();
-            }
-
-            _context.Entry(clientCompany).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
 
+                if (id != clientCompany.ClientCompanyId)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest();
+                }
+
+                _context.Entry(clientCompany).State = EntityState.Modified;
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformationEx($"Client Company {id} updated successfully");
+                return Ok($"Client Company {id} updated successfully");
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
                 if (!ClientCompanyExists(id))
                 {
-                    _logger.LogError($"Error. Client Company {id} not found.");
+                    _logger.LogErrorEx($"Error. Client Company {id} not found.");
                     return NotFound("The client company was not found");
                 }
-                else
-                {
-                    throw;
-                }
+
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
-            
-            _logger.LogInformation($"Client Company {id} updated successfully!");
-            return NoContent();
+            catch (Exception ex)
+            {
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
+            }
         }
 
         // POST: api/ClientCompany
@@ -137,24 +136,24 @@ namespace TCTravel.Controllers
         [HttpPost]
         public async Task<ActionResult<ClientCompany>> PostClientCompany(ClientCompany clientCompany)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 _context.ClientCompanies.Add(clientCompany);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"Client company created successfully");
+                _logger.LogInformationEx($"Client Company created successfully");
                 return CreatedAtAction("GetClientCompany", new { id = clientCompany.ClientCompanyId }, clientCompany);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(PostClientCompany)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -164,33 +163,33 @@ namespace TCTravel.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteClientCompany(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 var clientCompany = await _context.ClientCompanies.FindAsync(id);
 
                 if (clientCompany == null)
                 {
-                    _logger.LogError($"Error. Client Company {id} not found");
-                    return NotFound("The client company was not found");
+                    _logger.LogErrorEx($"Client Company {id} not found");
+                    return NotFound($"Client Company {id} not found");
                 }
 
                 _context.ClientCompanies.Remove(clientCompany);
 
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"Client Company {id} deleted successfully");
-                return NoContent();
+                _logger.LogInformationEx($"Client Company {id} deleted successfully");
+                return Ok($"Client Company {id} deleted successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(DeleteClientCompany)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again later.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
         

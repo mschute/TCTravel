@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TCTravel.Helpers;
 using TCTravel.Models;
 
 namespace TCTravel.Controllers
@@ -33,13 +34,13 @@ namespace TCTravel.Controllers
             {
                 var drivers = await _context.Drivers.ToListAsync();
             
-                _logger.LogInformation("Successfully retrieved Drivers.");
-                return drivers;
+                _logger.LogInformationEx("Successfully retrieved Drivers");
+                return Ok(drivers);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(GetDrivers)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -49,29 +50,29 @@ namespace TCTravel.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Driver>> GetDriver(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 var driver = await _context.Drivers.FindAsync(id);
 
                 if (driver == null)
                 {
-                    _logger.LogError($"Error, Driver {id} not found.");
+                    _logger.LogErrorEx($"Driver {id} not found");
                     return NotFound();
                 }
 
-                _logger.LogInformation($"Driver {id} retrieved successfully.");
-                return driver;
+                _logger.LogInformationEx($"Driver {id} retrieved successfully");
+                return Ok(driver);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(GetDriver)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -81,39 +82,43 @@ namespace TCTravel.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDriver(int id, Driver driver)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
-            if (id != driver.DriverId)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest();
-            }
-
-            _context.Entry(driver).State = EntityState.Modified;
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+
+                if (id != driver.DriverId)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest();
+                }
+
+                _context.Entry(driver).State = EntityState.Modified;
+
                 await _context.SaveChangesAsync();
+                
+                _logger.LogInformationEx($"Driver {id} updated successfully");
+                return Ok($"Driver {id} updated successfully");
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
                 if (!DriverExists(id))
                 {
-                    _logger.LogError($"Error. Driver {id} not found.");
-                    return NotFound("The driver was not found.");
+                    _logger.LogErrorEx($"Driver {id} not found");
+                    return NotFound($"Driver {id} not found");
                 }
-                else
-                {
-                    throw;
-                }
+                
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
-
-            _logger.LogInformation($"Driver {id} updated successfully!");
-            return NoContent();
+            catch (Exception ex)
+            {
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
+            }
         }
 
         // POST: api/Driver
@@ -123,24 +128,24 @@ namespace TCTravel.Controllers
         [HttpPost]
         public async Task<ActionResult<Driver>> PostDriver(Driver driver)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 _context.Drivers.Add(driver);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"Driver created successfully!");
+                _logger.LogInformationEx($"Driver created successfully");
                 return CreatedAtAction("GetDriver", new { id = driver.DriverId }, driver);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(PostDriver)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -150,32 +155,32 @@ namespace TCTravel.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDriver(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 var driver = await _context.Drivers.FindAsync(id);
                 if (driver == null)
                 {
-                    _logger.LogError($"Error. Driver {id} not found.");
-                    return NotFound("The driver was not found.");
+                    _logger.LogErrorEx($"Driver {id} not found");
+                    return NotFound($"Driver {id} not found");
                 }
 
                 _context.Drivers.Remove(driver);
             
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"Driver {id} deleted successfully!");
-                return NoContent();
+                _logger.LogInformationEx($"Driver {id} deleted successfully");
+                return Ok($"Driver {id} deleted successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(DeleteDriver)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again later.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 

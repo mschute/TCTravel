@@ -6,7 +6,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.AspNetCore.Authorization;
 using TCTravel.Helpers;
 
 namespace TCTravel.Controllers;
@@ -40,15 +39,15 @@ public class AccountController : ControllerBase
         // Handle invalid user input during registration process
         if (!ModelState.IsValid)
         {
-            _logger.LogError("Invalid model state during registration");
+            _logger.LogErrorEx("Invalid request");
             // If the incoming data is not valid, prevent further processing
-            return BadRequest("Invalid model state. Please check the provided data.");
+            return BadRequest(ModelState);
         }
 
         // Use helper method to check password validity
         if (!ValidationHelper.IsPasswordValid(model.Password))
         {
-            _logger.LogError("Invalid password used during registration");
+            _logger.LogErrorEx("Invalid password used during registration");
             return BadRequest("Invalid password. Please ensure your password contains at least 8 characters " +
                               "and contains at least one lower-case, upper-case, digit and symbol.");
         }
@@ -76,11 +75,11 @@ public class AccountController : ControllerBase
             _emailService.SendEmail(user.Email, emailSubject, emailBody);
 
             //TODO check if the username is print correctly
-            _logger.LogInformation($"User {user.UserName} registered successfully. Email verification link sent.");
-            return Ok("Tay Country Travel's user has been sent an email verification link to finalise the user authentication process.");
+            _logger.LogInformationEx($"User {user.UserName} registered successfully. Email verification link sent");
+            return Ok($"User {user.UserName} registered successfully. Email verification link sent");
         }
 
-        _logger.LogError($"Registration failed for user {user.UserName}. Errors: {string.Join(", ", result.Errors)}");
+        _logger.LogErrorEx($"Registration failed for user {user.UserName}. Errors: {string.Join(", ", result.Errors)}");
         return BadRequest(result.Errors);
     }
     
@@ -91,8 +90,8 @@ public class AccountController : ControllerBase
         // Ensure userID and token parameters are not null
         if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
         {
-            _logger.LogError("Invalid userId or token used during email verification process.");
-            return BadRequest("Invalid verification request. Please check provided data.");
+            _logger.LogErrorEx("Invalid userId or token used during email verification process");
+            return BadRequest("Invalid verification request. Please check provided data");
         }
         
         // Check if user exists before verifying the email, attempts to find user by userID asynchronously 
@@ -100,20 +99,20 @@ public class AccountController : ControllerBase
 
         if (user == null)
         {
-            _logger.LogError("User not found for email verification process.");
-            return NotFound("User not found.");
+            _logger.LogErrorEx("User not found");
+            return NotFound("User not found");
         }
         
         var result = await _userManager.ConfirmEmailAsync(user, token);
 
         if (result.Succeeded)
         {
-            _logger.LogInformation("Email verification for user was successful.");
-            return Ok("Email verification for Tay Country Travel was successful. Welcome new user! :-)");
+            _logger.LogInformationEx("Email verification successful");
+            return Ok("Email verification for Tay Country Travel was successful! Welcome new user!");
         }
 
-        _logger.LogError($"Email verification failed for user {user.UserName}. Errors: {string.Join(", ", result.Errors)}");
-        return BadRequest("Email verification failed. Please try again. :-(");
+        _logger.LogErrorEx($"Failed with error: {string.Join(", ", result.Errors)}");
+        return BadRequest("Email verification failed. Please try again.");
     }
 
     // Check whether account exists or not 
@@ -123,9 +122,9 @@ public class AccountController : ControllerBase
         // Handle invalid user input during login process
         if (!ModelState.IsValid)
         {
-            _logger.LogError("Invalid model state during login.");
+            _logger.LogErrorEx("Invalid request");
             // If data is not valid, prevent further processing
-            return BadRequest("Invalid model state. Please check the provided data.");
+            return BadRequest("Invalid request");
         }
         
         // Asynchronous method that attempts to sign in user with email and password
@@ -138,20 +137,20 @@ public class AccountController : ControllerBase
             var roles = await _userManager.GetRolesAsync(user);
             // Generating token
             var token = GenerateJwtToken(user, roles);
-            _logger.LogInformation($"Login for {model.Email} was successful");
+            _logger.LogInformationEx($"Login for {model.Email} was successful");
             // Return JWT Token for user authentication
             return Ok(new { Token = token });
         }
 
-        _logger.LogError($"Unauthorized login attempt for {model.Email}");
-        return Unauthorized("Invalid login attempt. Please try again.");
+        _logger.LogErrorEx($"Unauthorized login attempt for {model.Email}");
+        return Unauthorized($"Unauthorized login attempt for {model.Email}");
     }
     
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
         await _signInManager.SignOutAsync();
-        _logger.LogInformation("User logged out successfully.");
+        _logger.LogInformationEx("Logged out");
         return Ok("Logged out");
     }
 
@@ -160,8 +159,8 @@ public class AccountController : ControllerBase
         // Ensure the values used for generating the Jwt tokens are not null
         if (string.IsNullOrEmpty(_configuration["Jwt:Key"]) || string.IsNullOrEmpty(_configuration["Jwt:ExpireHours"]))
         {
-            _logger.LogError("Invalid operation exception, Jwt configuration is invalid.");
-            throw new InvalidOperationException("Jwt configuration is invalid.");
+            _logger.LogErrorEx("Jwt configuration is invalid");
+            throw new InvalidOperationException("Jwt configuration is invalid");
         }
         
         var claims = new List<Claim>
@@ -188,7 +187,7 @@ public class AccountController : ControllerBase
             signingCredentials: creds
         );
         
-        _logger.LogInformation("Jwt security token created successfully.");
+        _logger.LogInformationEx("Jwt security token created successfully");
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }

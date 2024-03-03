@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using TCTravel.Helpers;
 using TCTravel.Models;
 
 
@@ -32,13 +33,13 @@ namespace TCTravel.Controllers;
             {
                 var roles = _roleManager.Roles.ToList();
                 
-                _logger.LogInformation("Roles retrieved successfully!");
+                _logger.LogInformationEx("Roles retrieved successfully");
                 return Ok(roles);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(GetRoles)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -47,29 +48,29 @@ namespace TCTravel.Controllers;
         [HttpGet("{roleId}")]
         public async Task<IActionResult> GetRole(string roleId)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 var role = await _roleManager.FindByIdAsync(roleId);
 
                 if (role == null)
                 {
-                    _logger.LogError($"Error, Role {roleId} not found.");
-                    return NotFound("Role not found.");
+                    _logger.LogErrorEx($"Role {roleId} not found");
+                    return NotFound($"Role {roleId} not found");
                 }
                 
-                _logger.LogInformation($"Location {roleId} retrieved successfully.");
+                _logger.LogInformationEx($"Role {roleId} retrieved successfully");
                 return Ok(role);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(GetRole)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -78,30 +79,30 @@ namespace TCTravel.Controllers;
         [HttpPost]
         public async Task<IActionResult> CreateRole([FromBody] string roleName)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 var role = new IdentityRole(roleName);
                 var result = await _roleManager.CreateAsync(role);
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation($"Role {roleName} created successfully!");
-                    return Ok("Role created successfully.");
+                    _logger.LogInformationEx($"Role {roleName} created successfully");
+                    return Ok($"Role {roleName} created successfully");
                 }
                 
-                _logger.LogError("Error. Invalid request.");
+                _logger.LogErrorEx($"Invalid request: {string.Join(", ", result.Errors)}");
                 return BadRequest(result.Errors);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(CreateRole)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -112,7 +113,7 @@ namespace TCTravel.Controllers;
         {
             if (!ModelState.IsValid)
             {
-                _logger.LogError("Error. Invalid request.");
+                _logger.LogErrorEx("Invalid request");
                 return BadRequest(ModelState);
             }
             
@@ -120,8 +121,8 @@ namespace TCTravel.Controllers;
 
             if (role == null)
             {
-                _logger.LogError("Error. Role not found.");
-                return NotFound("Role not found.");
+                _logger.LogErrorEx($"Role {model.RoleId} not found");
+                return NotFound($"Role {model.RoleId} not found");
             }
 
             role.Name = model.NewRoleName;
@@ -129,11 +130,11 @@ namespace TCTravel.Controllers;
 
             if (result.Succeeded)
             {
-                _logger.LogInformation($"Role {model.RoleId} was updated successfully");
-                return Ok("Role updated successfully.");
+                _logger.LogInformationEx($"Role {model.RoleId} was updated successfully");
+                return Ok($"Role {model.RoleId} was updated successfully");
             }
 
-            _logger.LogError($"Error. Invalid request. {result.Errors}");
+            _logger.LogErrorEx($"Invalid request: {string.Join(", ", result.Errors)}");
             return BadRequest(result.Errors);
         }
 
@@ -144,7 +145,7 @@ namespace TCTravel.Controllers;
         {
             if (!ModelState.IsValid)
             {
-                _logger.LogError("Error. Invalid request.");
+                _logger.LogErrorEx("Invalid request");
                 return BadRequest(ModelState);
             }
             
@@ -152,19 +153,19 @@ namespace TCTravel.Controllers;
 
             if (role == null)
             {
-                _logger.LogError($"Error. Role {roleId} not found.");
-                return NotFound("Role not found.");
+                _logger.LogErrorEx($"Role {roleId} not found");
+                return NotFound($"Role {roleId} not found");
             }
 
             var result = await _roleManager.DeleteAsync(role);
 
             if (result.Succeeded)
             {
-                _logger.LogInformation($"Role {roleId} deleted successfully!");
-                return Ok("Role deleted successfully.");
+                _logger.LogInformationEx($"Role {roleId} deleted successfully");
+                return Ok("Role deleted successfully");
             }
 
-            _logger.LogError("Error. Invalid request.");
+            _logger.LogErrorEx($"Invalid request: {string.Join(", ", result.Errors)}");
             return BadRequest(result.Errors);
         }
 
@@ -173,9 +174,10 @@ namespace TCTravel.Controllers;
         [HttpPost("assign-role-to-user")]
         public async Task<IActionResult> AssignRoleToUser([FromBody] AssignRoleModel model)
         {
+            
             if (!ModelState.IsValid)
             {
-                _logger.LogError("Error. Invalid request.");
+                _logger.LogErrorEx("Error. Invalid request.");
                 return BadRequest(ModelState);
             }
             
@@ -183,7 +185,7 @@ namespace TCTravel.Controllers;
 
             if (user == null)
             {
-                _logger.LogError($"Error. User not found.");
+                _logger.LogErrorEx($"Error. User not found.");
                 return NotFound("User not found.");
             }
 
@@ -191,7 +193,7 @@ namespace TCTravel.Controllers;
 
             if (!roleExists)
             {
-                _logger.LogError($"Error. Role not found.");
+                _logger.LogErrorEx($"Error. Role not found.");
                 return NotFound("Role not found.");
             }
 
@@ -199,11 +201,11 @@ namespace TCTravel.Controllers;
 
             if (result.Succeeded)
             {
-                _logger.LogInformation($"Role {model.RoleName} assigned to use {model.UserId} assigned successfully!");
+                _logger.LogInformationEx($"Role {model.RoleName} assigned to use {model.UserId} assigned successfully!");
                 return Ok("Role assigned to user successfully.");
             }
 
-            _logger.LogError($"Invalid request. Errors: {string.Join(", ", result.Errors)}");
+            _logger.LogErrorEx($"Invalid request: {string.Join(", ", result.Errors)}");
             return BadRequest(result.Errors);
         }
     }

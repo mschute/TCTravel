@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TCTravel.Helpers;
 using TCTravel.Models;
 
 namespace TCTravel.Controllers
@@ -33,13 +30,13 @@ namespace TCTravel.Controllers
             {
                 var bookings = await _context.Bookings.ToListAsync();
             
-                _logger.LogInformation("Successfully retrieved booking.");
-                return bookings;
+                _logger.LogInformationEx("Successfully retrieved Bookings");
+                return Ok(bookings);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(GetBookings)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -49,29 +46,29 @@ namespace TCTravel.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Booking>> GetBooking(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError($"Error. Invalid data. Please try again.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx($"Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 var booking = await _context.Bookings.FindAsync(id);
 
                 if (booking == null)
                 {
-                    _logger.LogError($"Error, booking {id} not found.");
+                    _logger.LogErrorEx($"Error, booking {id} not found.");
                     return NotFound();
                 }
 
-                _logger.LogInformation($"Booking {id} retrieved successfully.");
-                return booking;
+                _logger.LogInformationEx($"Booking {id} retrieved successfully.");
+                return Ok(booking);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(GetBooking)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -81,39 +78,43 @@ namespace TCTravel.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutBooking(int id, Booking booking)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
-            if (id != booking.BookingId)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest();
-            }
-
-            _context.Entry(booking).State = EntityState.Modified;
-
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+
+                if (id != booking.BookingId)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest();
+                }
+
+                _context.Entry(booking).State = EntityState.Modified;
+
                 await _context.SaveChangesAsync();
+                
+                _logger.LogInformationEx($"Booking {id} updated successfully");
+                return Ok($"Booking {id} updated successfully");
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
                 if (!BookingExists(id))
                 {
-                    _logger.LogError($"Error. Booking {id} not found.");
-                    return NotFound(" The Booking was not found");
+                    _logger.LogErrorEx($"Booking {id} not found");
+                    return NotFound($"Booking {id} not found");
                 }
-                else
-                {
-                    throw;
-                }
+                
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
-
-            _logger.LogInformation($"Booking {id} updated successfully!");
-            return NoContent();
+            catch (Exception ex)
+            {
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
+            }
         }
 
         // POST: api/Booking
@@ -122,24 +123,24 @@ namespace TCTravel.Controllers
         [HttpPost]
         public async Task<ActionResult<Booking>> PostBooking(Booking booking)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 _context.Bookings.Add(booking);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"Booking created successfully!");
+                _logger.LogInformationEx($"Booking created successfully");
                 return CreatedAtAction("GetBooking", new { id = booking.BookingId }, booking);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(PostBooking)} failed with error: {ex.Message}");
-                return StatusCode(500, $"An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -149,32 +150,33 @@ namespace TCTravel.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBooking(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 var booking = await _context.Bookings.FindAsync(id);
 
                 if (booking == null)
                 {
-                    _logger.LogError($"Error. Booking {id} not found");
-                    return NotFound("The booking was not found.");
+                    _logger.LogErrorEx($"Booking {id} not found");
+                    return NotFound($"Booking {id} not found");
                 }
 
                 _context.Bookings.Remove(booking);
+                
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"Booking {id} deleted successfully");
-                return NoContent();
+                _logger.LogInformationEx($"Booking {id} deleted successfully");
+                return Ok($"Booking {id} deleted successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(DeleteBooking)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again later.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 

@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TCTravel.Helpers;
 using TCTravel.Models;
 
 namespace TCTravel.Controllers
@@ -33,13 +29,13 @@ namespace TCTravel.Controllers
             {
                 var customers = await _context.Customers.ToListAsync();
             
-                _logger.LogInformation("Successfully retrieved Customers.");
+                _logger.LogInformationEx("Successfully retrieved Customers");
                 return customers;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(GetCustomers)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -50,29 +46,29 @@ namespace TCTravel.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Customer>> GetCustomer(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 var customer = await _context.Customers.FindAsync(id);
 
                 if (customer == null)
                 {
-                    _logger.LogError($"Error, Customer {id} not found.");
-                    return NotFound("The customer was not found.");
+                    _logger.LogErrorEx($"Customer {id} not found");
+                    return NotFound($"Customer {id} not found");
                 }
 
-                _logger.LogInformation($"Customer {id} retrieved successfully.");
+                _logger.LogInformationEx($"Customer {id} retrieved successfully");
                 return customer;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(GetCustomer)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -82,39 +78,42 @@ namespace TCTravel.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCustomer(int id, Customer customer)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
-            if (id != customer.CustomerId)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest();
-            }
-
-            _context.Entry(customer).State = EntityState.Modified;
-
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+
+                if (id != customer.CustomerId)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest();
+                }
+
+                _context.Entry(customer).State = EntityState.Modified;
+
                 await _context.SaveChangesAsync();
+
+                _logger.LogInformationEx($"Customer {id} updated successfully");
+                return Ok($"Customer {id} updated successfully");
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
                 if (!CustomerExists(id))
                 {
-                    _logger.LogError($"Error. Customer {id} not found.");
+                    _logger.LogErrorEx($"Customer {id} not found.");
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
-
-            _logger.LogInformation($"Customer {id} updated successfully!");
-            return NoContent();
+            catch (Exception ex)
+            {
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
+            }
         }
 
         // POST: api/Customer
@@ -124,24 +123,24 @@ namespace TCTravel.Controllers
         [HttpPost]
         public async Task<ActionResult<Customer>> PostCustomer(Customer customer)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 _context.Customers.Add(customer);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"Customer created successfully");
+                _logger.LogInformationEx($"Customer created successfully");
                 return CreatedAtAction("GetCustomer", new { id = customer.CustomerId }, customer);
             }
             catch (Exception ex)
             {
-               _logger.LogError($"{nameof(PostCustomer)} failed with error: {ex}");
-               return StatusCode(500, "An unexpected error occurred. Please try again.");
+               _logger.LogErrorEx($"Failed with error: {ex}");
+               return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -151,18 +150,19 @@ namespace TCTravel.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 var customer = await _context.Customers.FindAsync(id);
+                
                 if (customer == null)
                 {
-                    _logger.LogError($"Error. Customer {id} not found");
+                    _logger.LogErrorEx($"Customer {id} not found");
                     return NotFound();
                 }
 
@@ -170,13 +170,13 @@ namespace TCTravel.Controllers
 
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"Customer {id} deleted successfully");
-                return NoContent();
+                _logger.LogInformationEx($"Customer {id} deleted successfully");
+                return Ok($"Customer {id} deleted successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(DeleteCustomer)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again later.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
