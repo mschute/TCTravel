@@ -46,6 +46,12 @@ namespace TCTravel.Controllers;
         [HttpGet("{roleId}")]
         public async Task<IActionResult> GetRole(string roleId)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             try
             {
                 var role = await _roleManager.FindByIdAsync(roleId);
@@ -71,6 +77,12 @@ namespace TCTravel.Controllers;
         [HttpPost]
         public async Task<IActionResult> CreateRole([FromBody] string roleName)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             try
             {
                 var role = new IdentityRole(roleName);
@@ -97,6 +109,12 @@ namespace TCTravel.Controllers;
         [HttpPut]
         public async Task<IActionResult> UpdateRole([FromBody] UpdateRoleModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             var role = await _roleManager.FindByIdAsync(model.RoleId);
 
             if (role == null)
@@ -123,6 +141,12 @@ namespace TCTravel.Controllers;
         [HttpDelete]
         public async Task<IActionResult> DeleteRole(string roleId)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             var role = await _roleManager.FindByIdAsync(roleId);
 
             if (role == null)
@@ -148,6 +172,12 @@ namespace TCTravel.Controllers;
         [HttpPost("assign-role-to-user")]
         public async Task<IActionResult> AssignRoleToUser([FromBody] AssignRoleModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             var user = await _userManager.FindByIdAsync(model.UserId);
 
             if (user == null)

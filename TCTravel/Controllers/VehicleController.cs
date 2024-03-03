@@ -46,6 +46,12 @@ namespace TCTravel.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Vehicle>> GetVehicle(int id)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             try
             {
                 var vehicle = await _context.Vehicles.FindAsync(id);
@@ -71,6 +77,12 @@ namespace TCTravel.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutVehicle(int id, Vehicle vehicle)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             if (id != vehicle.VehicleId)
             {
                 _logger.LogError("Error. Invalid request.");
@@ -105,12 +117,18 @@ namespace TCTravel.Controllers
         [HttpPost]
         public async Task<ActionResult<Vehicle>> PostVehicle(Vehicle vehicle)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             try
             {
                 _context.Vehicles.Add(vehicle);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Location created successfully!");
+                _logger.LogInformation("Vehicle created successfully!");
                 return CreatedAtAction("GetVehicle", new { id = vehicle.VehicleId }, vehicle);
             }
             catch (Exception ex)
@@ -125,12 +143,18 @@ namespace TCTravel.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVehicle(int id)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             try
             {
                 var vehicle = await _context.Vehicles.FindAsync(id);
                 if (vehicle == null)
                 {
-                    _logger.LogError($"Error. Location {id} not found.");
+                    _logger.LogError($"Error. Vehicle {id} not found.");
                     return NotFound("The location was not found.");
                 }
 
@@ -138,7 +162,7 @@ namespace TCTravel.Controllers
 
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"Location {id} deleted successfully!");
+                _logger.LogInformation($"Vehicle {id} deleted successfully!");
                 return NoContent();
             }
             catch (Exception ex)

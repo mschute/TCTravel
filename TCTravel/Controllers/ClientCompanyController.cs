@@ -46,6 +46,12 @@ namespace TCTravel.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ClientCompany>> GetClientCompany(int id)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             try
             {
                 var clientCompany = await _context.ClientCompanies.FindAsync(id);
@@ -72,6 +78,12 @@ namespace TCTravel.Controllers
 
         public async Task<IActionResult> PutClientCompany(int id, ClientCompany clientCompany)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             if (id != clientCompany.ClientCompanyId)
             {
                 _logger.LogError("Error. Invalid request.");
@@ -107,6 +119,12 @@ namespace TCTravel.Controllers
         [HttpPost]
         public async Task<ActionResult<ClientCompany>> PostClientCompany(ClientCompany clientCompany)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             try
             {
                 _context.ClientCompanies.Add(clientCompany);
@@ -128,6 +146,12 @@ namespace TCTravel.Controllers
 
         public async Task<IActionResult> DeleteClientCompany(int id)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             try
             {
                 var clientCompany = await _context.ClientCompanies.FindAsync(id);

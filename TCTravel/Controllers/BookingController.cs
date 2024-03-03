@@ -46,6 +46,12 @@ namespace TCTravel.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Booking>> GetBooking(int id)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError($"Error. Invalid data. Please try again.");
+                return BadRequest(ModelState);
+            }
+            
             try
             {
                 var booking = await _context.Bookings.FindAsync(id);
@@ -71,6 +77,12 @@ namespace TCTravel.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutBooking(int id, Booking booking)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             if (id != booking.BookingId)
             {
                 _logger.LogError("Error. Invalid request.");
@@ -105,6 +117,12 @@ namespace TCTravel.Controllers
         [HttpPost]
         public async Task<ActionResult<Booking>> PostBooking(Booking booking)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             try
             {
                 _context.Bookings.Add(booking);
@@ -115,8 +133,8 @@ namespace TCTravel.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(PostBooking)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogError($"{nameof(PostBooking)} failed with error: {ex.Message}");
+                return StatusCode(500, $"An unexpected error occurred. Please try again.");
             }
         }
 
@@ -125,6 +143,12 @@ namespace TCTravel.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBooking(int id)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             try
             {
                 var booking = await _context.Bookings.FindAsync(id);

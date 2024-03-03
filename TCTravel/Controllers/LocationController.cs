@@ -47,6 +47,12 @@ namespace TCTravel.Controllers
 
         public async Task<ActionResult<Location>> GetLocation(int id)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             try
             {
                 var location = await _context.Locations.FindAsync(id);
@@ -72,6 +78,12 @@ namespace TCTravel.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutLocation(int id, Location location)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             if (id != location.LocationId)
             {
                 _logger.LogError("Error. Invalid request.");
@@ -106,6 +118,12 @@ namespace TCTravel.Controllers
         [HttpPost]
         public async Task<ActionResult<Location>> PostLocation(Location location)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             try
             {
                 _context.Locations.Add(location);
@@ -126,6 +144,12 @@ namespace TCTravel.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLocation(int id)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             try
             {
                 var location = await _context.Locations.FindAsync(id);
