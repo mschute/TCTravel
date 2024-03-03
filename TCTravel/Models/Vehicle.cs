@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace TCTravel.Models;
 
 public class Vehicle
@@ -11,5 +13,6 @@ public class Vehicle
     public int Seats { get; set; }
     public decimal PricePerDay { get; set; }
     
-    public ICollection<Booking> Bookings { get; set; }
+    [JsonIgnore]
+    public ICollection<Booking>? Bookings { get; set; }
 }

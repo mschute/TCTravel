@@ -10,5 +10,6 @@ public class Driver
     public DateOnly? Dob { get; set; }
     public string? DrivingLicenseNo { get; set; }
     
-    public ICollection<Booking> Bookings { get; set; }
+    [JsonIgnore]
+    public ICollection<Booking>? Bookings { get; set; }
 }

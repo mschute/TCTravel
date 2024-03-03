@@ -226,10 +226,10 @@ namespace TCTravel.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BookingId"));
 
-                    b.Property<int>("ClientCompanyId")
+                    b.Property<int?>("ClientCompanyId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("CustomerId")
+                    b.Property<int?>("CustomerId")
                         .HasColumnType("integer");
 
                     b.Property<int>("DriverId")
@@ -238,16 +238,13 @@ namespace TCTravel.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("LocationId")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("TotalDays")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("TotalPrice")
+                    b.Property<decimal?>("TotalPrice")
                         .HasColumnType("numeric");
 
                     b.Property<int>("VehicleId")
@@ -261,11 +258,24 @@ namespace TCTravel.Migrations
 
                     b.HasIndex("DriverId");
 
-                    b.HasIndex("LocationId");
-
                     b.HasIndex("VehicleId");
 
                     b.ToTable("Bookings");
+                });
+
+            modelBuilder.Entity("TCTravel.Models.BookingLocation", b =>
+                {
+                    b.Property<int>("BookingId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LocationId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("BookingId", "LocationId");
+
+                    b.HasIndex("LocationId");
+
+                    b.ToTable("BookingLocations");
                 });
 
             modelBuilder.Entity("TCTravel.Models.ClientCompany", b =>
@@ -462,25 +472,17 @@ namespace TCTravel.Migrations
                 {
                     b.HasOne("TCTravel.Models.ClientCompany", "ClientCompany")
                         .WithMany("Bookings")
-                        .HasForeignKey("ClientCompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ClientCompanyId");
 
                     b.HasOne("TCTravel.Models.Customer", "Customer")
                         .WithMany("Bookings")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CustomerId");
 
                     b.HasOne("TCTravel.Models.Driver", "Driver")
                         .WithMany("Bookings")
                         .HasForeignKey("DriverId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("TCTravel.Models.Location", null)
-                        .WithMany("Bookings")
-                        .HasForeignKey("LocationId");
 
                     b.HasOne("TCTravel.Models.Vehicle", "Vehicle")
                         .WithMany("Bookings")
@@ -495,6 +497,30 @@ namespace TCTravel.Migrations
                     b.Navigation("Driver");
 
                     b.Navigation("Vehicle");
+                });
+
+            modelBuilder.Entity("TCTravel.Models.BookingLocation", b =>
+                {
+                    b.HasOne("TCTravel.Models.Booking", "Booking")
+                        .WithMany("BookingLocations")
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TCTravel.Models.Location", "Location")
+                        .WithMany("BookingLocations")
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+
+                    b.Navigation("Location");
+                });
+
+            modelBuilder.Entity("TCTravel.Models.Booking", b =>
+                {
+                    b.Navigation("BookingLocations");
                 });
 
             modelBuilder.Entity("TCTravel.Models.ClientCompany", b =>
@@ -514,7 +540,7 @@ namespace TCTravel.Migrations
 
             modelBuilder.Entity("TCTravel.Models.Location", b =>
                 {
-                    b.Navigation("Bookings");
+                    b.Navigation("BookingLocations");
                 });
 
             modelBuilder.Entity("TCTravel.Models.Vehicle", b =>
