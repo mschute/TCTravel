@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TCTravel.Helpers;
 using TCTravel.Models;
 
 namespace TCTravel.Controllers
@@ -33,13 +34,13 @@ namespace TCTravel.Controllers
             {
                 var locations = await _context.Locations.ToListAsync();
             
-                _logger.LogInformation("Successfully retrieved Locations.");
-                return locations;
+                _logger.LogInformationEx("Successfully retrieved Locations");
+                return Ok(locations);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(GetLocations)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -49,29 +50,29 @@ namespace TCTravel.Controllers
 
         public async Task<ActionResult<Location>> GetLocation(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 var location = await _context.Locations.FindAsync(id);
 
                 if (location == null)
                 {
-                    _logger.LogError($"Error, Location {id} not found.");
-                    return NotFound();
+                    _logger.LogErrorEx($"Location {id} not found");
+                    return NotFound($"Location {id} not found");
                 }
 
-                _logger.LogInformation($"Location {id} retrieved successfully.");
-                return location;
+                _logger.LogInformationEx($"Location {id} retrieved successfully");
+                return Ok(location);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(GetLocation)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -80,39 +81,43 @@ namespace TCTravel.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutLocation(int id, Location location)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
-            if (id != location.LocationId)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest();
-            }
-
-            _context.Entry(location).State = EntityState.Modified;
-
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+
+                if (id != location.LocationId)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest();
+                }
+
+                _context.Entry(location).State = EntityState.Modified;
+
                 await _context.SaveChangesAsync();
+                
+                _logger.LogInformationEx($"Location {id} updated successfully");
+                return Ok($"Location {id} updated successfully");
             }
             catch (DbUpdateConcurrencyException)
             {
                 if (!LocationExists(id))
                 {
-                    _logger.LogError($"Error. Driver {id} not found.");
+                    _logger.LogErrorEx($"Driver {id} not found");
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+                
+                _logger.LogErrorEx($"Vehicle {id} not found");
+                return NotFound($"Vehicle {id} not found");
             }
-
-            _logger.LogInformation($"Location {id} updated successfully!");
-            return NoContent();
+            catch (Exception ex)
+            {
+                _logger.LogErrorEx($"Vehicle {id} not found");
+                return NotFound($"Vehicle {id} not found");
+            }
         }
 
         // POST: api/Location
@@ -120,24 +125,24 @@ namespace TCTravel.Controllers
         [HttpPost]
         public async Task<ActionResult<Location>> PostLocation(Location location)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 _context.Locations.Add(location);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Location created successfully!");
+                _logger.LogInformationEx("Location created successfully");
                 return CreatedAtAction("GetLocation", new { id = location.LocationId }, location);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(PostLocation)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -146,32 +151,33 @@ namespace TCTravel.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLocation(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 var location = await _context.Locations.FindAsync(id);
+                
                 if (location == null)
                 {
-                    _logger.LogError($"Error. Location {id} not found.");
-                    return NotFound("The location was not found.");
+                    _logger.LogErrorEx($"Location {id} not found");
+                    return NotFound($"Location {id} not found");
                 }
 
                 _context.Locations.Remove(location);
 
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"Location {id} deleted successfully!");
-                return NoContent();
+                _logger.LogInformationEx($"Location {id} deleted successfully");
+                return Ok($"Location {id} deleted successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(DeleteLocation)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again later.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 

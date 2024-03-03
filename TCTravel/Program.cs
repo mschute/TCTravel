@@ -53,7 +53,7 @@ builder.Services.AddAuthentication(options =>
     })
     .AddJwtBearer(options =>
     {
-        // Override default events type for JwtBearerEvents in order to use logging
+        // Override default events type for JwtBearerEvents in order to use logging for Jwt events
         options.EventsType = typeof(AppJwtBearerEvents);
         
         options.TokenValidationParameters = new TokenValidationParameters

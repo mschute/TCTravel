@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TCTravel.Helpers;
 using TCTravel.Models;
 
 namespace TCTravel.Controllers
@@ -33,13 +29,13 @@ namespace TCTravel.Controllers
             {
                 var vehicles = await _context.Vehicles.ToListAsync();
             
-                _logger.LogInformation("Successfully retrieved Vehicles.");
-                return vehicles;
+                _logger.LogInformationEx("Successfully retrieved Vehicles");
+                return Ok(vehicles);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(GetVehicles)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -48,29 +44,29 @@ namespace TCTravel.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Vehicle>> GetVehicle(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx($"Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 var vehicle = await _context.Vehicles.FindAsync(id);
 
                 if (vehicle == null)
                 {
-                    _logger.LogError($"Error, Vehicle {id} not found.");
-                    return NotFound("The vehicle was not found.");
+                    _logger.LogErrorEx($"Vehicle {id} not found");
+                    return NotFound($"Vehicle {id} not found");
                 }
 
-                _logger.LogInformation($"Vehicle {id} retrieved successfully!");
-                return vehicle;
+                _logger.LogInformationEx($"Vehicle {id} retrieved successfully");
+                return Ok(vehicle);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(GetVehicle)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -79,39 +75,43 @@ namespace TCTravel.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutVehicle(int id, Vehicle vehicle)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
-            if (id != vehicle.VehicleId)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest();
-            }
-
-            _context.Entry(vehicle).State = EntityState.Modified;
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+            
+                if (id != vehicle.VehicleId)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest();
+                }
+
+                _context.Entry(vehicle).State = EntityState.Modified;
+            
                 await _context.SaveChangesAsync();
+                
+                _logger.LogInformationEx($"Vehicle {id} updated successfully");
+                return Ok($"Vehicle {id} updated successfully");
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
                 if (!VehicleExists(id))
                 {
-                    _logger.LogError($"Error. Vehicle {id} not found.");
-                    return NotFound("The vehicle was not found.");
+                    _logger.LogErrorEx($"Vehicle {id} not found");
+                    return NotFound($"Vehicle {id} not found");
                 }
-                else
-                {
-                    throw;
-                }
+                
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
-
-            _logger.LogInformation($"Vehicle {id} updated successfully!");
-            return NoContent();
+            catch (Exception ex)
+            {
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
+            }
         }
 
         // POST: api/Vehicle
@@ -119,24 +119,24 @@ namespace TCTravel.Controllers
         [HttpPost]
         public async Task<ActionResult<Vehicle>> PostVehicle(Vehicle vehicle)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 _context.Vehicles.Add(vehicle);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Vehicle created successfully!");
+                _logger.LogInformation("Vehicle created successfully");
                 return CreatedAtAction("GetVehicle", new { id = vehicle.VehicleId }, vehicle);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(PostVehicle)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogError($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -145,32 +145,33 @@ namespace TCTravel.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVehicle(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogError("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 var vehicle = await _context.Vehicles.FindAsync(id);
+                
                 if (vehicle == null)
                 {
-                    _logger.LogError($"Error. Vehicle {id} not found.");
-                    return NotFound("The location was not found.");
+                    _logger.LogError($"Vehicle {id} not found");
+                    return NotFound($"Vehicle {id} not found");
                 }
 
                 _context.Vehicles.Remove(vehicle);
 
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation($"Vehicle {id} deleted successfully!");
-                return NoContent();
+                _logger.LogInformation($"Vehicle {id} deleted successfully");
+                return Ok($"Vehicle {id} deleted successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(DeleteVehicle)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again later.");
+                _logger.LogError($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 

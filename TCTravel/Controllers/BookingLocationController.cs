@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TCTravel.Helpers;
 using TCTravel.Models;
 
-// Adjusted Many-to-Many Controller using this reference: https://nxk.io/2019/04/01/dealing-with-composite-primary-keys-and-entityframework-scaffolded-controllers/
+// Many-to-Many Controller Reference: https://nxk.io/2019/04/01/dealing-with-composite-primary-keys-and-entityframework-scaffolded-controllers/
 
 namespace TCTravel.Controllers
 {
@@ -35,13 +31,13 @@ namespace TCTravel.Controllers
             {
                 var bookingLocation = await _context.BookingLocations.ToListAsync();
 
-                _logger.LogInformation("Successfully retrieved booking location");
+                _logger.LogInformationEx("Successfully retrieved BookingLocation");
                 return bookingLocation;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(GetBookingLocations)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
@@ -51,70 +47,30 @@ namespace TCTravel.Controllers
         [HttpGet("{bookingId}/{locationId}")]
         public async Task<ActionResult<BookingLocation>> GetBookingLocation([FromRoute] int bookingId, [FromRoute] int locationId)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError($"Error. Invalid request. Please try again.");
-                return BadRequest(ModelState);
-            }
-            
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx($"Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 var bookingLocation = await _context.BookingLocations.FindAsync(bookingId, locationId);
 
                 if (bookingLocation == null)
                 {
-                    _logger.LogError($"Error, location {locationId} for booking {bookingId} not found.");
-                    return NotFound();
+                    _logger.LogErrorEx($"Booking {bookingId} / Location {locationId} not found");
+                    return NotFound($"Booking {bookingId} / Location {locationId} not found");
                 }
-
+                
+                _logger.LogInformationEx($"Booking {bookingId} / Location {locationId} retrieved successfully");
                 return Ok(bookingLocation);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(GetBookingLocation)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
-        }
-
-        // PUT: api/BookingLocation/bookingId/locationId
-        // Update specific BookingLocation
-        [Authorize(Roles = "SuperAdmin,Admin")]
-        [HttpPut("{bookingId}/{locationId}")]
-        public async Task<IActionResult> PutBookingLocation([FromRoute] int bookingId, [FromRoute] int locationId, [FromBody] BookingLocation bookingLocation)
-        {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError($"Error. Invalid request. Please try again.");
-                return BadRequest(ModelState);
-            }
-            
-            if (bookingId != bookingLocation.BookingId && locationId != bookingLocation.LocationId)
-            {
-                _logger.LogError($"Error. Invalid request. Please try again.");
-                return BadRequest();
-            }
-
-            _context.Entry(bookingLocation).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BookingLocationExists(bookingId, locationId))
-                {
-                    _logger.LogError($"Error. Location {locationId} and Booking {bookingId} not found.");
-                    return NotFound("The location for that booking was not found.");
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            _logger.LogInformation($"Location {locationId} for Booking {bookingId} was not found.");
-            return NoContent();
         }
 
         // POST: api/BookingLocation
@@ -122,33 +78,83 @@ namespace TCTravel.Controllers
         [HttpPost]
         public async Task<ActionResult<BookingLocation>> PostBookingLocation([FromBody] BookingLocation bookingLocation)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-
-            _context.BookingLocations.Add(bookingLocation);
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+
+                _context.BookingLocations.Add(bookingLocation);
+
                 await _context.SaveChangesAsync();
+                
+                return CreatedAtAction("GetBookingLocation", new { bookingId = bookingLocation.BookingId ,
+                    locationId = bookingLocation.LocationId }, bookingLocation);
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException ex)
             {
                 if (BookingLocationExists(bookingLocation.BookingId, bookingLocation.LocationId))
                 {
                     var statusConflict = new StatusCodeResult(StatusCodes.Status409Conflict);
-                    _logger.LogError($"{nameof(PostBookingLocation)} failed with error: {statusConflict}");
+                    _logger.LogError($"Failed with error: {statusConflict}");
                     return statusConflict;
                 }
-                else
-                {
-                    throw;
-                }
+                
+                _logger.LogError($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
+            }
+        }
+        
+        // PUT: api/BookingLocation/bookingId/locationId
+        // Update specific BookingLocation
+        [Authorize(Roles = "SuperAdmin,Admin")]
+        [HttpPut("{bookingId}/{locationId}")]
+        public async Task<IActionResult> PutBookingLocation([FromRoute] int bookingId, [FromRoute] int locationId, [FromBody] BookingLocation bookingLocation)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
 
-            return CreatedAtAction("GetBookingLocation", new { bookingId = bookingLocation.BookingId ,
-                locationId = bookingLocation.LocationId }, bookingLocation);
+                if (bookingId != bookingLocation.BookingId && locationId != bookingLocation.LocationId)
+                {
+                    _logger.LogErrorEx($"Invalid request");
+                    return BadRequest();
+                }
+
+                _context.Entry(bookingLocation).State = EntityState.Modified;
+
+                await _context.SaveChangesAsync();
+                
+                _logger.LogInformationEx($"Booking {bookingId} / Location {locationId} updated successfully");
+                return Ok($"Booking {bookingId} / Location {locationId} updated successfully");
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                if (!BookingLocationExists(bookingId, locationId))
+                {
+                    _logger.LogErrorEx($"Booking {bookingId} / Location {locationId} not found");
+                    return NotFound($"Booking {bookingId} / Location {locationId} not found");
+                }
+                
+                _logger.LogError($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
+            }
         }
 
         // DELETE: api/BookingLocation/5
@@ -156,31 +162,32 @@ namespace TCTravel.Controllers
         [Authorize(Roles = "SuperAdmin,Admin")]
         public async Task<IActionResult> DeleteBookingLocation([FromRoute] int bookingId, [FromRoute] int locationId)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Error. Invalid request.");
-                return BadRequest(ModelState);
-            }
-
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogErrorEx("Invalid request");
+                    return BadRequest(ModelState);
+                }
+                
                 var bookingLocation = await _context.BookingLocations.FindAsync(bookingId, locationId);
+                
                 if (bookingLocation == null)
                 {
-                    _logger.LogError("Error. BookingLocation not found.");
-                    return NotFound();
+                    _logger.LogErrorEx($"Booking {bookingId} / Location {locationId} not found");
+                    return NotFound($"Booking {bookingId} / Location {locationId} not found");
                 }
 
                 _context.BookingLocations.Remove(bookingLocation);
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("BookingLocation deleted successfully!");
-                return NoContent();
+                _logger.LogInformationEx($"Booking {bookingId} / Location {locationId} deleted successfully");
+                return Ok($"Booking {bookingId} / Location {locationId} deleted successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"{nameof(DeleteBookingLocation)} failed with error: {ex}");
-                return StatusCode(500, "An unexpected error occurred. Please try again later.");
+                _logger.LogErrorEx($"Failed with error: {ex}");
+                return StatusCode(500, $"Failed with error: {ex}");
             }
         }
 
