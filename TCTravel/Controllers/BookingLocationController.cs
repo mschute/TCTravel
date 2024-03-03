@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +27,7 @@ namespace TCTravel.Controllers
 
         // GET: api/BookingLocation
         // Retrieve booking locations
+        [Authorize(Roles = "SuperAdmin,Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookingLocation>>> GetBookingLocations()
         {
@@ -45,6 +47,7 @@ namespace TCTravel.Controllers
 
         // GET: api/BookingLocation/bookingId/locationId
         // Retrieve specific booking location
+        [Authorize(Roles = "SuperAdmin,Admin,ClientCompany,Customer,Driver")]
         [HttpGet("{bookingId}/{locationId}")]
         public async Task<ActionResult<BookingLocation>> GetBookingLocation([FromRoute] int bookingId, [FromRoute] int locationId)
         {
@@ -75,6 +78,7 @@ namespace TCTravel.Controllers
 
         // PUT: api/BookingLocation/bookingId/locationId
         // Update specific BookingLocation
+        [Authorize(Roles = "SuperAdmin,Admin")]
         [HttpPut("{bookingId}/{locationId}")]
         public async Task<IActionResult> PutBookingLocation([FromRoute] int bookingId, [FromRoute] int locationId, [FromBody] BookingLocation bookingLocation)
         {
@@ -114,6 +118,7 @@ namespace TCTravel.Controllers
         }
 
         // POST: api/BookingLocation
+        [Authorize(Roles = "SuperAdmin,Admin")]
         [HttpPost]
         public async Task<ActionResult<BookingLocation>> PostBookingLocation([FromBody] BookingLocation bookingLocation)
         {
@@ -148,6 +153,7 @@ namespace TCTravel.Controllers
 
         // DELETE: api/BookingLocation/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "SuperAdmin,Admin")]
         public async Task<IActionResult> DeleteBookingLocation([FromRoute] int bookingId, [FromRoute] int locationId)
         {
             if (!ModelState.IsValid)

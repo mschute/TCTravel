@@ -31,12 +31,8 @@ public class AccountController : ControllerBase
         _configuration = configuration;
         _logger = logger;
     }
-
-    // Authorize ensures only requests with Jwt tokens can access the associated action
-    [Authorize]
-    // Register user to website 
-    [HttpPost("register")]
     
+    [HttpPost("register")]
     //Taking in AuthModel which means, it will only need an email and password to register the user
     //These are the only two fields needed in the JSON body for the POST action
     public async Task<IActionResult> Register(AuthModel model)
@@ -65,7 +61,7 @@ public class AccountController : ControllerBase
         {
             // Generate an email verification token, user can now communicate with endpoint services
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
+            
             // Create the verification link
             //TODO Check if email is a valid email
             var verificationLink = Url.Action("VerifyEmail", "Account", new { userId = user.Id, token = token },
@@ -87,8 +83,7 @@ public class AccountController : ControllerBase
         _logger.LogError($"Registration failed for user {user.UserName}. Errors: {string.Join(", ", result.Errors)}");
         return BadRequest(result.Errors);
     }
-
-
+    
     // Add an action to handle email verification
     [HttpGet("verify-email")]
     public async Task<IActionResult> VerifyEmail(string userId, string token)
@@ -143,7 +138,7 @@ public class AccountController : ControllerBase
             var roles = await _userManager.GetRolesAsync(user);
             // Generating token
             var token = GenerateJwtToken(user, roles);
-            _logger.LogInformation($"Login for {model.Email} was successful.");
+            _logger.LogInformation($"Login for {model.Email} was successful");
             // Return JWT Token for user authentication
             return Ok(new { Token = token });
         }
@@ -151,7 +146,7 @@ public class AccountController : ControllerBase
         _logger.LogError($"Unauthorized login attempt for {model.Email}");
         return Unauthorized("Invalid login attempt. Please try again.");
     }
-
+    
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {

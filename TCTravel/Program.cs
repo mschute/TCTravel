@@ -29,7 +29,9 @@ builder.Services.AddDbContext<TCTravelContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Connection")));
 
 // Configure Identity Framework 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<TCTravelContext>().AddDefaultTokenProviders();
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<TCTravelContext>()
+    .AddDefaultTokenProviders();
 
 // Included configured service from EmailSettings.cs
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));

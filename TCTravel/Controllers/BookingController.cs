@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ namespace TCTravel.Controllers
 
         // GET: api/Booking
         // Retrieve all bookings
+        [Authorize(Roles = "SuperAdmin,Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Booking>>> GetBookings()
         {
@@ -43,6 +45,7 @@ namespace TCTravel.Controllers
 
         // GET: api/Booking/5
         // Retrieve specific bookings
+        [Authorize(Roles = "SuperAdmin,Admin,ClientCompany,Customer,Driver")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Booking>> GetBooking(int id)
         {
@@ -74,6 +77,7 @@ namespace TCTravel.Controllers
 
         // PUT: api/Booking/5
         // Update specific booking
+        [Authorize(Roles = "SuperAdmin,Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutBooking(int id, Booking booking)
         {
@@ -114,6 +118,7 @@ namespace TCTravel.Controllers
 
         // POST: api/Booking
         // Create booking
+        [Authorize(Roles = "SuperAdmin,Admin")]
         [HttpPost]
         public async Task<ActionResult<Booking>> PostBooking(Booking booking)
         {
@@ -140,6 +145,7 @@ namespace TCTravel.Controllers
 
         // DELETE: api/Booking/5
         // Delete specific booking
+        [Authorize(Roles = "SuperAdmin,Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBooking(int id)
         {

@@ -8,7 +8,8 @@ namespace TCTravel.Controllers;
 
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    // Authorize only SuperAdmin to manage user roles
+    [Authorize(Roles = "SuperAdmin")]
     public class RolesController : ControllerBase
     {
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -128,11 +129,11 @@ namespace TCTravel.Controllers;
 
             if (result.Succeeded)
             {
-                _logger.LogError($"Role {model.RoleId} was updated successfully");
+                _logger.LogInformation($"Role {model.RoleId} was updated successfully");
                 return Ok("Role updated successfully.");
             }
 
-            _logger.LogError("Error. Invalid request.");
+            _logger.LogError($"Error. Invalid request. {result.Errors}");
             return BadRequest(result.Errors);
         }
 
