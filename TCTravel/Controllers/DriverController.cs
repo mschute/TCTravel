@@ -46,6 +46,12 @@ namespace TCTravel.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Driver>> GetDriver(int id)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             try
             {
                 var driver = await _context.Drivers.FindAsync(id);
@@ -71,6 +77,12 @@ namespace TCTravel.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDriver(int id, Driver driver)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             if (id != driver.DriverId)
             {
                 _logger.LogError("Error. Invalid request.");
@@ -105,6 +117,12 @@ namespace TCTravel.Controllers
         [HttpPost]
         public async Task<ActionResult<Driver>> PostDriver(Driver driver)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             try
             {
                 _context.Drivers.Add(driver);
@@ -125,6 +143,12 @@ namespace TCTravel.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDriver(int id)
         {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Error. Invalid request.");
+                return BadRequest(ModelState);
+            }
+            
             try
             {
                 var driver = await _context.Drivers.FindAsync(id);
