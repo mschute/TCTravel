@@ -41,7 +41,6 @@ namespace TCTravel.Controllers
 
         // GET: api/Customer/5
         // Retrieve specific customer
-        //TODO Configure specific user access
         [Authorize(Roles = "SuperAdmin,Admin,Customer")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Customer>> GetCustomer(int id)
@@ -118,8 +117,7 @@ namespace TCTravel.Controllers
 
         // POST: api/Customer
         // Create Customer
-        //TODO May need to update based on specific user access
-        [Authorize(Roles = "SuperAdmin,Admin,Customer")]
+        [Authorize(Roles = "SuperAdmin,Admin")]
         [HttpPost]
         public async Task<ActionResult<Customer>> PostCustomer(Customer customer)
         {
