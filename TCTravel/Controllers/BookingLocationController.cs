@@ -158,6 +158,7 @@ namespace TCTravel.Controllers
         }
 
         // DELETE: api/BookingLocation/5
+        // Delete specific booking
         [HttpDelete("{id}")]
         [Authorize(Roles = "SuperAdmin,Admin")]
         public async Task<IActionResult> DeleteBookingLocation([FromRoute] int bookingId, [FromRoute] int locationId)

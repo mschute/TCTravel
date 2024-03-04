@@ -20,7 +20,7 @@ namespace TCTravel.Controllers
         }
 
         // GET: api/Customer
-        // Retrieve all client companies
+        // Retrieve all customer
         [Authorize(Roles = "SuperAdmin,Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()

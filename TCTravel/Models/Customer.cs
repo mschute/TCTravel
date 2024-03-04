@@ -12,4 +12,5 @@ public class Customer
     
     [JsonIgnore]
     public ICollection<Booking>? Bookings { get; set; }
+    
 }
