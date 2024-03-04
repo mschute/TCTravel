@@ -23,3 +23,4 @@ This project is for Tay Country Travel, a luxury travel company that offers tran
 
 SuperAdmin will have authorisation to do any action in any controller. Admin will have the ability to Create, Edit, Update or Delete information for a Booking, BookingLocation, ClientCompany, Customer, Driver, Location and Vehicle. ClientCompany, Customer and Driver instances will be assigned to specific registered users. Then those users will be able to retrieve and update their specific information.
 
+This project is deployed on Microsoft Azure.
