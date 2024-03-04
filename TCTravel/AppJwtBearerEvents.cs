@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 namespace TCTravel;
 
 // Reference: https://stackoverflow.com/questions/58618964/dependency-injection-inside-jwtbearerevents
+// Override JWTBearerEvents methods to inject loggers to JWT events
 public class AppJwtBearerEvents : JwtBearerEvents
 {
     private readonly ILogger<AppJwtBearerEvents> _logger;

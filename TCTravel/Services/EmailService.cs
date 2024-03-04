@@ -19,8 +19,8 @@ public class EmailService
     public void SendEmail(string toEmail, string subject, string body)
     {
         var message = new MimeMessage();
-        message.From.Add(new MailboxAddress("Support CareApp", _emailSettings.SmtpUsername));
-        message.To.Add(new MailboxAddress("Reciever Name", toEmail));
+        message.From.Add(new MailboxAddress("Tay Country Travel", _emailSettings.SmtpUsername));
+        message.To.Add(new MailboxAddress("Beloved client", toEmail));
         message.Subject = subject;
         var textPart = new TextPart("plain") { Text = body };
         message.Body = textPart;

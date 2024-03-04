@@ -44,7 +44,7 @@ namespace TCTravel.Controllers;
         }
 
         // Get: api/Roles/5
-        // Retrieve specific roles
+        // Retrieve specific role
         [HttpGet("{roleId}")]
         public async Task<IActionResult> GetRole(string roleId)
         {

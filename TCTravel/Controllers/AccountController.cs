@@ -20,7 +20,7 @@ public class AccountController : ControllerBase
     private readonly IConfiguration _configuration;
     private readonly ILogger<AccountController> _logger;
 
-    // User dependency injection to pass the logger to AccountController
+    // Used dependency injection to pass the logger to AccountController
     public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager,
         EmailService emailService, IConfiguration configuration, ILogger<AccountController> logger)
     {
@@ -31,9 +31,9 @@ public class AccountController : ControllerBase
         _logger = logger;
     }
     
+    // Method to register user to website using password and email
     [HttpPost("register")]
-    //Taking in AuthModel which means, it will only need an email and password to register the user
-    //These are the only two fields needed in the JSON body for the POST action
+    //Passing AuthNMode to allow user registration through email and password
     public async Task<IActionResult> Register(AuthModel model)
     {
         // Handle invalid user input during registration process
@@ -62,7 +62,6 @@ public class AccountController : ControllerBase
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             
             // Create the verification link
-            //TODO Check if email is a valid email
             var verificationLink = Url.Action("VerifyEmail", "Account", new { userId = user.Id, token = token },
                 Request.Scheme);
 
@@ -73,8 +72,7 @@ public class AccountController : ControllerBase
                             $"\n\nKind regards,\n" +
                             $"Tay Country Travel Team";
             _emailService.SendEmail(user.Email, emailSubject, emailBody);
-
-            //TODO check if the username is print correctly
+            
             _logger.LogInformationEx($"User {user.UserName} registered successfully. Email verification link sent");
             return Ok($"User {user.UserName} registered successfully. Email verification link sent");
         }
@@ -83,7 +81,7 @@ public class AccountController : ControllerBase
         return BadRequest(result.Errors);
     }
     
-    // Add an action to handle email verification
+    // Action to handle email verification following registration
     [HttpGet("verify-email")]
     public async Task<IActionResult> VerifyEmail(string userId, string token)
     {
@@ -115,7 +113,7 @@ public class AccountController : ControllerBase
         return BadRequest("Email verification failed. Please try again.");
     }
 
-    // Check whether account exists or not 
+    // Log user into account
     [HttpPost("login")]
     public async Task<IActionResult> Login(AuthModel model)
     {
@@ -131,6 +129,7 @@ public class AccountController : ControllerBase
         var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, isPersistent: false,
             lockoutOnFailure: false);
 
+        // Log user in if email and password combination are valid
         if (result.Succeeded)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
@@ -146,6 +145,7 @@ public class AccountController : ControllerBase
         return Unauthorized($"Unauthorized login attempt for {model.Email}");
     }
     
+    // Log user out of their account
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
@@ -154,6 +154,7 @@ public class AccountController : ControllerBase
         return Ok("Logged out");
     }
 
+    // Generate JSON Web Token for user authentication
     private string GenerateJwtToken(IdentityUser user, IList<string> roles)
     {
         // Ensure the values used for generating the Jwt tokens are not null
@@ -175,8 +176,11 @@ public class AccountController : ControllerBase
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
 
+        // Encode the Jwt token
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        
+        // Configure when the Jwt token expires
         var expires = DateTime.Now.AddHours(Convert.ToDouble(_configuration["Jwt:ExpireHours"]));
 
         var token = new JwtSecurityToken(

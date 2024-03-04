@@ -21,6 +21,7 @@ public class TCTravelContext : IdentityDbContext<IdentityUser>
 
     public DbSet<BookingLocation> BookingLocations { get; set; } = default!;
 
+    // overriding OnModelCreating to establish many-to-many relationship between Booking and Location
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

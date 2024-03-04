@@ -2,9 +2,7 @@ using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Console;
 using Microsoft.IdentityModel.Tokens;
 using TCTravel;
 using TCTravel.Controllers;
@@ -12,37 +10,32 @@ using TCTravel.Models;
 using TCTravel.Service;
 using TCTravel.Services;
 
+// Page includes various dependency injections to support this web application
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuring the logging for this application with minimum level of log messages set to Warning or higher
+// Configuring the logging with log level and logging output type
 builder.Logging.AddFilter("Microsoft.AspNetCore", LogLevel.Warning)
-    // Ensuring no previous log providers are set
     .ClearProviders()
-    // Output logs to the console
     .AddConsole()
-    // Output the logs to a file with the following path
     .AddFile($"Logs/TCTravel-{typeof(JSType.Date)}.txt");
 
 builder.Services.AddControllersWithViews();
 
+// Configure the database 
 builder.Services.AddDbContext<TCTravelContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Connection")));
 
-// Configure Identity Framework 
+// Configure identity framework for user registration, login etc.
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<TCTravelContext>()
     .AddDefaultTokenProviders();
 
-// Included configured service from EmailSettings.cs
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
-// Registers the email service with a scoped lifetime of a single request
 builder.Services.AddScoped<EmailService>();
 
-// Registers the email service with a scoped lifetime of a single request
 builder.Services.AddScoped<RolesController>();
 
-// Registers the AppJwtBearer Events with a scoped lifetime of a single request
 builder.Services.AddScoped<AppJwtBearerEvents>();
 
 // Configure Jwt authentication
@@ -74,7 +67,6 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
