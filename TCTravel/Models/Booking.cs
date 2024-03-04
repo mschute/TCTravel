@@ -18,9 +18,6 @@ public class Booking
     public int? CustomerId { get; set; }
     [JsonIgnore]
     public Customer? Customer { get; set; }
-    public int? ClientCompanyId { get; set; }
-    [JsonIgnore]
-    public ClientCompany? ClientCompany { get; set; }
     
     public ICollection<BookingLocation>? BookingLocations { get; set; }
 }

@@ -41,13 +41,10 @@ namespace TCTravel.Controllers
 
         // GET: api/ClientCompany/5
         // Retrieve specific client companies
-        // TODO Note: This is currently not configured to only allow specific user to update only their user information
-        // TODO Will need to assign specific user role id upon sign up.
         [Authorize(Roles = "SuperAdmin,Admin,ClientCompany")]
         [HttpGet("{id}")]
         
-        //TODO Need to pass AssignRoleModel for specific user restrictions
-        public async Task<ActionResult<ClientCompany>> GetClientCompany(int id)
+        public async Task<ActionResult<ClientCompany>> GetClientCompany(int id, AssignRoleModel model)
         {
             try
             {
@@ -64,13 +61,6 @@ namespace TCTravel.Controllers
                     _logger.LogErrorEx($"Client Company {id} not found.");
                     return NotFound($"Client Company {id} not found.");
                 }
-
-                //TODO Finish implementing specific user restrictions
-                // if (id != model.ClientCompanyId && model.RoleName != "SuperAdmin" && model.RoleName != "Admin")
-                // {
-                //     _logger.LogErrorEx("User is unauthorized to get this information.");
-                //     return Unauthorized(new { message = "Unauthorized" });
-                // }
                 
                 _logger.LogInformationEx($"Client Company {id} retrieved successfully");
                 return clientCompany;
@@ -84,7 +74,6 @@ namespace TCTravel.Controllers
 
         // PUT: api/ClientCompany/5
         // Update specific client company
-        // TODO Need to configure restriction for only the user to update their own data
         [Authorize(Roles = "SuperAdmin,Admin,ClientCompany")]
         [HttpPut("{id}")]
 
@@ -131,7 +120,6 @@ namespace TCTravel.Controllers
 
         // POST: api/ClientCompany
         // Create Client Company
-        //TODO May need to edit this depending on how I configure specific user access
         [Authorize(Roles = "SuperAdmin,Admin,ClientCompany")]
         [HttpPost]
         public async Task<ActionResult<ClientCompany>> PostClientCompany(ClientCompany clientCompany)

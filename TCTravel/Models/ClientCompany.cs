@@ -13,4 +13,5 @@ public class ClientCompany
     
     [JsonIgnore]
     public ICollection<Booking>? Bookings { get; set; }
+    public ICollection<Customer>? Customers { get; set; }
 }

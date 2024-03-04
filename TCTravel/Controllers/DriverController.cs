@@ -123,7 +123,6 @@ namespace TCTravel.Controllers
 
         // POST: api/Driver
         // Create Driver
-        //TODO May need to update based on specific driver
         [Authorize(Roles = "SuperAdmin,Admin,Driver")]
         [HttpPost]
         public async Task<ActionResult<Driver>> PostDriver(Driver driver)
