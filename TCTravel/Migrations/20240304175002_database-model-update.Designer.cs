@@ -12,8 +12,8 @@ using TCTravel.Models;
 namespace TCTravel.Migrations
 {
     [DbContext(typeof(TCTravelContext))]
-    [Migration("20240304173326_adjust-table-connection")]
-    partial class adjusttableconnection
+    [Migration("20240304175002_database-model-update")]
+    partial class databasemodelupdate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

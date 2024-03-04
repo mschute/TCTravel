@@ -5,7 +5,7 @@
 namespace TCTravel.Migrations
 {
     /// <inheritdoc />
-    public partial class adjusttableconnection : Migration
+    public partial class databasemodelupdate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
