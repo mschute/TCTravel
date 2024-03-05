@@ -9,7 +9,7 @@ namespace TCTravel.Controllers
     [Route("api/[controller]")]
     [ApiController]
     // Only SuperAdmin and Admin authorised to manage this controller
-    [Authorize(Roles = "SuperAdmin,Admin")]
+    //[Authorize(Roles = "SuperAdmin,Admin")]
     public class VehicleController : ControllerBase
     {
         private readonly TCTravelContext _context;
