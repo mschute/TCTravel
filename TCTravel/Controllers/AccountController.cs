@@ -157,8 +157,13 @@ public class AccountController : ControllerBase
     // Generate JSON Web Token for user authentication
     private string GenerateJwtToken(IdentityUser user, IList<string> roles)
     {
+        var keyConfig = _configuration["Jwt:Key"] ?? "MyKey123";
+        var expireHoursConfig = _configuration["Jwt:ExpireHours"] ?? "1";
+        var issuerConfig = _configuration["Jwt:Issuer"];
+        var audienceConfig = _configuration["Jwt:Audience"];
+        
         // Ensure the values used for generating the Jwt tokens are not null
-        if (string.IsNullOrEmpty(_configuration["Jwt:Key"]) || string.IsNullOrEmpty(_configuration["Jwt:ExpireHours"]))
+        if (string.IsNullOrEmpty(keyConfig) || string.IsNullOrEmpty(expireHoursConfig))
         {
             _logger.LogErrorEx("Jwt configuration is invalid");
             throw new InvalidOperationException("Jwt configuration is invalid");
@@ -177,18 +182,18 @@ public class AccountController : ControllerBase
         }
 
         // Encode the Jwt token
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyConfig));
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         
         // Configure when the Jwt token expires
-        var expires = DateTime.Now.AddHours(Convert.ToDouble(_configuration["Jwt:ExpireHours"]));
+        var expires = DateTime.Now.AddHours(Convert.ToDouble(expireHoursConfig));
 
         var token = new JwtSecurityToken(
-            _configuration["Jwt:Issuer"],
-            _configuration["Jwt:Issuer"],
+            issuerConfig,
+            audienceConfig,
             claims,
             expires: expires,
-            signingCredentials: creds
+            signingCredentials: credentials
         );
         
         _logger.LogInformationEx("Jwt security token created successfully");

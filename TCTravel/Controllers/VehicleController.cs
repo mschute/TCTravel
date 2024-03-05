@@ -35,7 +35,7 @@ namespace TCTravel.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogErrorEx($"Failed with error: {ex}");
+                _logger.LogErrorEx($"Failed with error: {ex.InnerException}");
                 return StatusCode(500, $"Failed with error: {ex}");
             }
         }
