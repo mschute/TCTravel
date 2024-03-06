@@ -22,7 +22,7 @@ namespace TCTravel.Controllers
 
         // GET: api/Booking
         // Retrieve all bookings
-        //[Authorize(Roles = "SuperAdmin,Admin")]
+        [Authorize(Roles = "SuperAdmin,Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Booking>>> GetBookings()
         {
