@@ -120,7 +120,7 @@ namespace TCTravel.Controllers
 
         // POST: api/ClientCompany
         // Create Client Company
-        [Authorize(Roles = "SuperAdmin,Admin,ClientCompany")]
+        [Authorize(Roles = "SuperAdmin")]
         [HttpPost]
         public async Task<ActionResult<ClientCompany>> PostClientCompany(ClientCompany clientCompany)
         {
