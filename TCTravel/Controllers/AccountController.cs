@@ -157,18 +157,6 @@ public class AccountController : ControllerBase
     // Generate JSON Web Token for user authentication
     private string GenerateJwtToken(IdentityUser user, IList<string> roles)
     {
-        var keyConfig = _configuration["Jwt:Key"] ?? "MyKey123";
-        var expireHoursConfig = _configuration["Jwt:ExpireHours"] ?? "1";
-        var issuerConfig = _configuration["Jwt:Issuer"];
-        var audienceConfig = _configuration["Jwt:Issuer"];
-        
-        // Ensure the values used for generating the Jwt tokens are not null
-        if (string.IsNullOrEmpty(keyConfig) || string.IsNullOrEmpty(expireHoursConfig))
-        {
-            _logger.LogErrorEx("Jwt configuration is invalid");
-            throw new InvalidOperationException("Jwt configuration is invalid");
-        }
-        
         var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Email),
@@ -181,22 +169,18 @@ public class AccountController : ControllerBase
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
 
-        // Encode the Jwt token
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyConfig));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        
-        // Configure when the Jwt token expires
-        var expires = DateTime.Now.AddHours(Convert.ToDouble(expireHoursConfig));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var expires = DateTime.Now.AddHours(Convert.ToDouble(_configuration["Jwt:ExpireHours"]));
 
         var token = new JwtSecurityToken(
-            issuerConfig,
-            audienceConfig,
+            _configuration["Jwt:Issuer"],
+            _configuration["Jwt:Issuer"],
             claims,
             expires: expires,
-            signingCredentials: credentials
+            signingCredentials: creds
         );
-        
-        _logger.LogInformationEx("Jwt security token created successfully");
+
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
