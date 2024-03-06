@@ -160,7 +160,7 @@ public class AccountController : ControllerBase
         var keyConfig = _configuration["Jwt:Key"] ?? "MyKey123";
         var expireHoursConfig = _configuration["Jwt:ExpireHours"] ?? "1";
         var issuerConfig = _configuration["Jwt:Issuer"];
-        var audienceConfig = _configuration["Jwt:Audience"];
+        var audienceConfig = _configuration["Jwt:Issuer"];
         
         // Ensure the values used for generating the Jwt tokens are not null
         if (string.IsNullOrEmpty(keyConfig) || string.IsNullOrEmpty(expireHoursConfig))
