@@ -44,7 +44,7 @@ namespace TCTravel.Controllers
         [Authorize(Roles = "SuperAdmin,Admin,ClientCompany")]
         [HttpGet("{id}")]
         
-        public async Task<ActionResult<ClientCompany>> GetClientCompany(int id, AssignRoleModel model)
+        public async Task<ActionResult<ClientCompany>> GetClientCompany(int id)
         {
             try
             {
