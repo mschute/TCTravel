@@ -120,7 +120,7 @@ namespace TCTravel.Controllers
 
         // POST: api/ClientCompany
         // Create Client Company
-        [Authorize(Roles = "SuperAdmin")]
+        [Authorize(Roles = "SuperAdmin,Admin,ClientCompany")]
         [HttpPost]
         public async Task<ActionResult<ClientCompany>> PostClientCompany(ClientCompany clientCompany)
         {
@@ -140,7 +140,7 @@ namespace TCTravel.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogErrorEx($"Failed with error: {ex}");
+                _logger.LogErrorEx($"Failed with error: {ex.InnerException}");
                 return StatusCode(500, $"Failed with error: {ex}");
             }
         }
