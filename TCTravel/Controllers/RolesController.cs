@@ -10,7 +10,7 @@ namespace TCTravel.Controllers;
     [Route("api/[controller]")]
     [ApiController]
     // Authorize only SuperAdmin to manage user roles
-    //[Authorize(Roles = "SuperAdmin")]
+    [Authorize(Roles = "SuperAdmin")]
     public class RolesController : ControllerBase
     {
         private readonly RoleManager<IdentityRole> _roleManager;
